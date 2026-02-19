@@ -425,12 +425,12 @@ function drawVolumeKnob() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const S = 64;
+  const S = 128;
   canvas.width = S * dpr;
   canvas.height = S * dpr;
   ctx.scale(dpr, dpr);
 
-  const cx = S / 2, cy = S / 2, R = 28;
+  const cx = S / 2, cy = S / 2, R = 56;
   const vol = state.volume;
 
   // Knob arc range: 135° to 405° (= -45° → 225° from top)
@@ -443,7 +443,7 @@ function drawVolumeKnob() {
   // Outer track (dark)
   ctx.beginPath();
   ctx.arc(cx, cy, R, startAngle, endAngle);
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 6;
   ctx.strokeStyle = 'rgba(255,255,255,0.07)';
   ctx.lineCap = 'round';
   ctx.stroke();
@@ -457,7 +457,7 @@ function drawVolumeKnob() {
     grad.addColorStop(1, '#ef4444');
     ctx.beginPath();
     ctx.arc(cx, cy, R, startAngle, volAngle);
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 6;
     ctx.strokeStyle = grad;
     ctx.lineCap = 'round';
     ctx.stroke();
@@ -468,16 +468,16 @@ function drawVolumeKnob() {
     const gx = cx + Math.cos(volAngle) * R;
     const gy = cy + Math.sin(volAngle) * R;
     const glowColor = vol < 0.5 ? 'rgba(61,220,132,0.4)' : vol < 0.8 ? 'rgba(251,191,36,0.4)' : 'rgba(239,68,68,0.4)';
-    const dotGlow = ctx.createRadialGradient(gx, gy, 0, gx, gy, 10);
+    const dotGlow = ctx.createRadialGradient(gx, gy, 0, gx, gy, 20);
     dotGlow.addColorStop(0, glowColor);
     dotGlow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = dotGlow;
-    ctx.fillRect(gx - 10, gy - 10, 20, 20);
+    ctx.fillRect(gx - 20, gy - 20, 40, 40);
   }
 
   // Knob body (dark metallic circle)
-  const knobR = 19;
-  const bodyGrad = ctx.createRadialGradient(cx - 3, cy - 3, 0, cx, cy, knobR);
+  const knobR = 38;
+  const bodyGrad = ctx.createRadialGradient(cx - 6, cy - 6, 0, cx, cy, knobR);
   bodyGrad.addColorStop(0, '#3a3a42');
   bodyGrad.addColorStop(0.6, '#26262c');
   bodyGrad.addColorStop(1, '#1a1a1e');
@@ -494,30 +494,30 @@ function drawVolumeKnob() {
   ctx.stroke();
 
   // Brushed concentric rings
-  for (let r = 5; r < knobR; r += 2) {
+  for (let r = 10; r < knobR; r += 3) {
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.lineWidth = 0.3;
+    ctx.lineWidth = 0.5;
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.stroke();
   }
 
   // Indicator line on knob
-  const indLen = knobR - 4;
-  const ix = cx + Math.cos(volAngle) * 7;
-  const iy = cy + Math.sin(volAngle) * 7;
+  const indLen = knobR - 6;
+  const ix = cx + Math.cos(volAngle) * 14;
+  const iy = cy + Math.sin(volAngle) * 14;
   const ox = cx + Math.cos(volAngle) * indLen;
   const oy = cy + Math.sin(volAngle) * indLen;
   ctx.beginPath();
   ctx.moveTo(ix, iy);
   ctx.lineTo(ox, oy);
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   ctx.strokeStyle = '#fff';
   ctx.lineCap = 'round';
   ctx.stroke();
 
   // Volume percentage text
-  ctx.font = 'bold 10px "Courier New", monospace';
+  ctx.font = 'bold 16px "Courier New", monospace';
   ctx.fillStyle = 'rgba(255,255,255,0.45)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';

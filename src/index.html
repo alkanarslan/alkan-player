@@ -422,7 +422,6 @@
           <div class="track-title" id="track-title">Şarkı seçin</div>
           <div class="track-artist" id="track-artist">—</div>
         </div>
-        <canvas id="vu-meter-canvas" class="vu-meter-canvas" width="340" height="96"></canvas>
       </div>
 
       <!-- Controls -->
@@ -459,12 +458,13 @@
 
       <!-- Volume & Time -->
       <div class="player-right">
+        <canvas id="vu-meter-canvas" class="vu-meter-canvas" width="340" height="96"></canvas>
         <span class="time-display">
           <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
         </span>
         <div class="volume-control">
           <div class="volume-knob-wrapper" id="volume-knob-wrapper" title="Ses">
-            <canvas id="volume-knob-canvas" class="volume-knob-canvas" width="64" height="64"></canvas>
+            <canvas id="volume-knob-canvas" class="volume-knob-canvas" width="128" height="128"></canvas>
             <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="80" style="display:none">
           </div>
         </div>

@@ -825,7 +825,7 @@ body::before {
    PLAYER BAR
    ============================================ */
 .player-bar {
-  height: 120px;
+  height: 148px;
   background: rgba(10, 10, 15, 0.85);
   backdrop-filter: blur(30px);
   border-top: 1px solid var(--border);
@@ -913,7 +913,7 @@ body::before {
 .player-content {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   padding: 0 24px;
   gap: 20px;
@@ -1049,15 +1049,15 @@ body::before {
 
 .volume-knob-wrapper {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 128px;
+  height: 128px;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .volume-knob-canvas {
-  width: 64px;
-  height: 64px;
+  width: 128px;
+  height: 128px;
   display: block;
 }
 
@@ -1824,6 +1824,9 @@ body::before {
   }
   .track-item-album,
   .track-item-format {
+    display: none;
+  }
+  .vu-meter-canvas {
     display: none;
   }
 }
