@@ -258,9 +258,8 @@ ipcMain.handle('youtube-download', async (event, url) => {
 });
 
 // Save/Load playlists
-const playlistsPath = path.join(app.getPath('userData'), 'playlists.json');
-const libraryPath = path.join(app.getPath('userData'), 'library.json');
 const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+const defaultDataPath = app.getPath('userData');
 
 // --- Settings ---
 function loadSettings() {
@@ -269,11 +268,24 @@ function loadSettings() {
       return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     }
   } catch (err) {}
-  return { downloadPath: path.join(__dirname, 'downloads') };
+  return { downloadPath: path.join(__dirname, 'downloads'), dataPath: '' };
 }
 
 function saveSettings(settings) {
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+}
+
+function getDataPath() {
+  const settings = loadSettings();
+  return settings.dataPath || defaultDataPath;
+}
+
+function getPlaylistsPath() {
+  return path.join(getDataPath(), 'playlists.json');
+}
+
+function getLibraryPath() {
+  return path.join(getDataPath(), 'library.json');
 }
 
 ipcMain.handle('load-settings', async () => {
@@ -300,7 +312,10 @@ ipcMain.handle('select-folder', async () => {
 // --- Library Persistence ---
 ipcMain.handle('save-library', async (event, library) => {
   try {
-    fs.writeFileSync(libraryPath, JSON.stringify(library, null, 2));
+    const p = getLibraryPath();
+    const dir = path.dirname(p);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(p, JSON.stringify(library, null, 2));
     return true;
   } catch (err) {
     return false;
@@ -309,8 +324,9 @@ ipcMain.handle('save-library', async (event, library) => {
 
 ipcMain.handle('load-library', async () => {
   try {
-    if (fs.existsSync(libraryPath)) {
-      return JSON.parse(fs.readFileSync(libraryPath, 'utf-8'));
+    const p = getLibraryPath();
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, 'utf-8'));
     }
   } catch (err) {}
   return [];
@@ -318,7 +334,10 @@ ipcMain.handle('load-library', async () => {
 
 ipcMain.handle('save-playlists', async (event, playlists) => {
   try {
-    fs.writeFileSync(playlistsPath, JSON.stringify(playlists, null, 2));
+    const p = getPlaylistsPath();
+    const dir = path.dirname(p);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(p, JSON.stringify(playlists, null, 2));
     return true;
   } catch (err) {
     return false;
@@ -327,8 +346,9 @@ ipcMain.handle('save-playlists', async (event, playlists) => {
 
 ipcMain.handle('load-playlists', async () => {
   try {
-    if (fs.existsSync(playlistsPath)) {
-      return JSON.parse(fs.readFileSync(playlistsPath, 'utf-8'));
+    const p = getPlaylistsPath();
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, 'utf-8'));
     }
   } catch (err) {}
   return [];
@@ -337,6 +357,11 @@ ipcMain.handle('load-playlists', async () => {
 // Get downloads folder path
 ipcMain.handle('get-downloads-path', () => {
   return path.join(__dirname, 'downloads');
+});
+
+// Get current data path
+ipcMain.handle('get-data-path', () => {
+  return getDataPath();
 });
 
 // Reveal in explorer

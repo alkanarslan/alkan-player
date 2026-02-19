@@ -1801,6 +1801,23 @@ body::before {
   font-size: 13px;
 }
 
+.playlist-pick-item {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.playlist-pick-item:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--accent);
+}
+
 /* ============================================
    RESPONSIVE ADJUSTMENTS
    ============================================ */

@@ -18,6 +18,7 @@ const state = {
   downloads: [],
   settings: {
     downloadPath: '',
+    dataPath: '',
   },
 };
 
@@ -677,20 +678,38 @@ function showPlaylistPicker(filePath) {
     showToast('Önce bir çalma listesi oluşturun', 'info');
     return;
   }
-  // Simple: add to first playlist for now, or show a quick picker
-  const names = state.playlists.map(p => p.name);
-  const choice = prompt('Hangi listeye eklensin?\n' + names.map((n, i) => `${i + 1}. ${n}`).join('\n'));
-  if (!choice) return;
-  const idx = parseInt(choice) - 1;
-  if (idx >= 0 && idx < state.playlists.length) {
-    if (!state.playlists[idx].tracks.includes(filePath)) {
-      state.playlists[idx].tracks.push(filePath);
-      savePlaylists();
-      showToast(`"${state.playlists[idx].name}" listesine eklendi`, 'success');
-    } else {
-      showToast('Şarkı zaten listede', 'info');
-    }
-  }
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  const listItems = state.playlists.map((p, i) =>
+    `<button class="playlist-pick-item" data-idx="${i}">${p.name} <span style="color:var(--text-muted);font-size:12px">(${p.tracks.length} şarkı)</span></button>`
+  ).join('');
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Çalma Listesine Ekle</h3>
+      <div class="playlist-pick-list" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px">
+        ${listItems}
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost btn-cancel">İptal</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.querySelector('.btn-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelectorAll('.playlist-pick-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      if (!state.playlists[idx].tracks.includes(filePath)) {
+        state.playlists[idx].tracks.push(filePath);
+        savePlaylists();
+        showToast(`"${state.playlists[idx].name}" listesine eklendi`, 'success');
+      } else {
+        showToast('Şarkı zaten listede', 'info');
+      }
+      close();
+    });
+  });
 }
 
 // --- Sidebar Navigation ---
@@ -1783,8 +1802,12 @@ async function saveSettingsToFile() {
 
 function renderSettings() {
   const pathEl = $('#settings-download-path');
+  const dataPathEl = $('#settings-data-path');
   const countEl = $('#settings-library-count');
   if (pathEl) pathEl.textContent = state.settings.downloadPath || 'Varsayılan';
+  if (dataPathEl) {
+    window.electronAPI.getDataPath().then(p => { dataPathEl.textContent = p; });
+  }
   if (countEl) countEl.textContent = `${state.library.length} şarkı`;
 }
 
@@ -1795,6 +1818,16 @@ $('#btn-change-download-path').addEventListener('click', async () => {
     await saveSettingsToFile();
     renderSettings();
     showToast('İndirme klasörü güncellendi', 'success');
+  }
+});
+
+$('#btn-change-data-path').addEventListener('click', async () => {
+  const folder = await window.electronAPI.selectFolder();
+  if (folder) {
+    state.settings.dataPath = folder;
+    await saveSettingsToFile();
+    renderSettings();
+    showToast('Veri klasörü güncellendi. Değişiklik uygulandı.', 'success');
   }
 });
 

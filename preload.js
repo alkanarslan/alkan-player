@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // YouTube
   youtubeDownload: (url) => ipcRenderer.invoke('youtube-download', url),
   getDownloadsPath: () => ipcRenderer.invoke('get-downloads-path'),
+  getDataPath: () => ipcRenderer.invoke('get-data-path'),
 
   // Playlists
   savePlaylists: (data) => ipcRenderer.invoke('save-playlists', data),
