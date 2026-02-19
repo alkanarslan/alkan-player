@@ -5,6 +5,30 @@ const mm = require('music-metadata');
 const NodeID3 = require('node-id3');
 const ytmusic = require('./ytmusic');
 
+// Resolve paths for binaries (handles asar unpacking)
+function resolveUnpackedPath(p) {
+  return p.replace('app.asar', 'app.asar.unpacked');
+}
+
+const ffmpegPath = resolveUnpackedPath(require('ffmpeg-static'));
+
+function getYtdlpPath() {
+  const binName = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+  const bundled = resolveUnpackedPath(
+    path.join(__dirname, 'node_modules', 'youtube-dl-exec', 'bin', binName)
+  );
+  if (fs.existsSync(bundled)) return bundled;
+  return 'yt-dlp';
+}
+
+function getYtdlpBaseArgs() {
+  const args = ['--no-check-certificates', '--no-warnings'];
+  if (ffmpegPath) args.push('--ffmpeg-location', ffmpegPath);
+  const nodePath = process.execPath;
+  if (nodePath) args.push('--js-runtimes', `node:${nodePath}`);
+  return args;
+}
+
 let mainWindow;
 const SUPPORTED_FORMATS = ['.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac', '.wma', '.opus', '.aiff'];
 
@@ -41,7 +65,11 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  app.quit();
+  if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
 // Allow webview permissions (for YouTube login, media playback)
@@ -165,18 +193,13 @@ ipcMain.handle('youtube-download', async (event, url) => {
     const downloadsPath = settings.downloadPath || path.join(__dirname, 'downloads');
     if (!fs.existsSync(downloadsPath)) fs.mkdirSync(downloadsPath, { recursive: true });
 
-    // Find yt-dlp binary
-    let ytdlpPath = 'yt-dlp';
-    const bundledPath = path.join(__dirname, 'node_modules', 'youtube-dl-exec', 'bin', 'yt-dlp.exe');
-    if (fs.existsSync(bundledPath)) {
-      ytdlpPath = bundledPath;
-    }
+    const ytdlpPath = getYtdlpPath();
+    const baseArgs = getYtdlpBaseArgs();
 
     // Get video info
     const { stdout: infoJson } = await execFileAsync(ytdlpPath, [
       '--dump-single-json',
-      '--no-check-certificates',
-      '--no-warnings',
+      ...baseArgs,
       url,
     ], { maxBuffer: 10 * 1024 * 1024 });
 
@@ -190,8 +213,8 @@ ipcMain.handle('youtube-download', async (event, url) => {
       '--audio-format', 'mp3',
       '--audio-quality', '0',
       '-o', outputPath,
-      '--no-check-certificates',
       '--no-playlist',
+      ...baseArgs,
       url,
     ], { maxBuffer: 10 * 1024 * 1024, timeout: 300000 });
 
@@ -432,16 +455,14 @@ ipcMain.handle('yt-get-stream-url', async (event, videoId) => {
     const { promisify } = require('util');
     const execFileAsync = promisify(execFile);
 
-    let ytdlpPath = 'yt-dlp';
-    const bundledPath = path.join(__dirname, 'node_modules', 'youtube-dl-exec', 'bin', 'yt-dlp.exe');
-    if (fs.existsSync(bundledPath)) ytdlpPath = bundledPath;
+    const ytdlpPath = getYtdlpPath();
+    const baseArgs = getYtdlpBaseArgs();
 
     const url = `https://www.youtube.com/watch?v=${videoId}`;
     const { stdout } = await execFileAsync(ytdlpPath, [
       '-f', 'bestaudio',
       '-g',
-      '--no-check-certificates',
-      '--no-warnings',
+      ...baseArgs,
       url,
     ], { maxBuffer: 5 * 1024 * 1024, timeout: 20000 });
 

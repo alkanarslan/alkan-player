@@ -6,10 +6,16 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder --win",
+    "build": "electron-builder --win --mac --linux",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
     "build:portable": "electron-builder --win portable"
   },
-  "author": "Alkan",
+  "author": {
+    "name": "Alkan",
+    "email": "alkanarslan@me.com"
+  },
   "license": "MIT",
   "build": {
     "appId": "com.alkan.player",
@@ -25,6 +31,18 @@
       "node_modules/**/*",
       "downloads/"
     ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**",
+      "node_modules/youtube-dl-exec/bin/**"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.music",
+      "icon": "src/assets/icon.png"
+    },
     "win": {
       "target": [
         {
@@ -35,6 +53,14 @@
         }
       ],
       "icon": "src/assets/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Audio",
+      "icon": "src/assets/icon.png"
     },
     "nsis": {
       "oneClick": false,
@@ -52,6 +78,7 @@
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
+    "ffmpeg-static": "^5.3.0",
     "music-metadata": "^7.14.0",
     "node-id3": "^0.2.6",
     "youtube-dl-exec": "^2.4.0"
