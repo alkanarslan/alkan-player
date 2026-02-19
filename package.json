@@ -1,0 +1,59 @@
+{
+  "name": "alkan-player",
+  "version": "1.4.0",
+  "description": "Modern müzik oynatıcı - Yerel dosyalar ve YouTube desteği",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "build:portable": "electron-builder --win portable"
+  },
+  "author": "Alkan",
+  "license": "MIT",
+  "build": {
+    "appId": "com.alkan.player",
+    "productName": "Alkan Player",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "ytmusic.js",
+      "src/**/*",
+      "node_modules/**/*",
+      "downloads/"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "src/assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "src/assets/icon.ico",
+      "uninstallerIcon": "src/assets/icon.ico",
+      "installerHeaderIcon": "src/assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Alkan Player"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "music-metadata": "^7.14.0",
+    "node-id3": "^0.2.6",
+    "youtube-dl-exec": "^2.4.0"
+  }
+}
