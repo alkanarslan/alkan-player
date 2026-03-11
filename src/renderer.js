@@ -14,11 +14,13 @@ const state = {
   volume: 0.8,
   currentView: 'library',
   activePlaylistId: null,
+  playQueue: null,
   searchQuery: '',
   downloads: [],
   settings: {
     downloadPath: '',
     dataPath: '',
+    theme: 'dark',
   },
 };
 
@@ -139,6 +141,25 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   els.toastContainer.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+
+function updatePlaylistPlayingState() {
+  if (!state.activePlaylistId) return;
+  const items = els.playlistTracks?.querySelectorAll('.playlist-item');
+  if (!items || items.length === 0) return;
+  items.forEach(item => {
+    const fp = item.dataset.path;
+    const isCurrent = fp && state.currentTrack?.filePath === fp;
+    item.classList.toggle('playing', isCurrent && state.isPlaying);
+  });
+}
+
+function applyTheme(theme) {
+  const allowed = ['dark', 'light', 'ocean', 'amber', 'forest', 'mono'];
+  const normalized = allowed.includes(theme) ? theme : 'dark';
+  document.body.dataset.theme = normalized;
+  const themeSelect = $('#settings-theme');
+  if (themeSelect) themeSelect.value = normalized;
 }
 
 // --- Views ---
@@ -264,8 +285,14 @@ function escapeHtml(str) {
 
 // --- Playback ---
 async function playTrack(index, trackList = null) {
-  const list = trackList || state.library;
+  const list = trackList || state.playQueue || state.library;
   if (index < 0 || index >= list.length) return;
+
+  if (trackList) {
+    state.playQueue = trackList;
+  } else if (!state.playQueue) {
+    state.playQueue = state.library;
+  }
 
   const track = list[index];
   state.currentTrack = track;
@@ -285,6 +312,7 @@ async function playTrack(index, trackList = null) {
     updatePlayButton();
     updateNowPlaying();
     renderTrackList();
+    updatePlaylistPlayingState();
     startVisualizer();
     startVuMeter();
   } catch (err) {
@@ -296,7 +324,7 @@ async function playTrack(index, trackList = null) {
 function togglePlay() {
   if (!state.currentTrack) {
     if (state.library.length > 0) {
-      playTrack(0);
+      playTrack(0, state.library);
     }
     return;
   }
@@ -315,7 +343,8 @@ function togglePlay() {
 }
 
 function playNext() {
-  if (state.library.length === 0) return;
+  const queue = state.playQueue || state.library;
+  if (queue.length === 0) return;
   if (state.repeat === 'one') {
     audioElement.currentTime = 0;
     audioElement.play();
@@ -324,26 +353,27 @@ function playNext() {
 
   let nextIndex;
   if (state.shuffle) {
-    nextIndex = Math.floor(Math.random() * state.library.length);
+    nextIndex = Math.floor(Math.random() * queue.length);
   } else {
     nextIndex = state.currentIndex + 1;
-    if (nextIndex >= state.library.length) {
+    if (nextIndex >= queue.length) {
       if (state.repeat === 'all') nextIndex = 0;
       else { state.isPlaying = false; updatePlayButton(); return; }
     }
   }
-  playTrack(nextIndex);
+  playTrack(nextIndex, queue);
 }
 
 function playPrev() {
-  if (state.library.length === 0) return;
+  const queue = state.playQueue || state.library;
+  if (queue.length === 0) return;
   if (audioElement.currentTime > 3) {
     audioElement.currentTime = 0;
     return;
   }
   let prevIndex = state.currentIndex - 1;
-  if (prevIndex < 0) prevIndex = state.library.length - 1;
-  playTrack(prevIndex);
+  if (prevIndex < 0) prevIndex = queue.length - 1;
+  playTrack(prevIndex, queue);
 }
 
 function updatePlayButton() {
@@ -354,6 +384,7 @@ function updatePlayButton() {
     els.playIcon.innerHTML = '<polygon points="6,3 20,12 6,21"/>';
     els.albumArt.classList.remove('playing');
   }
+  updatePlaylistPlayingState();
 }
 
 function updateNowPlaying() {
@@ -630,7 +661,7 @@ els.trackList.addEventListener('click', (e) => {
   const item = e.target.closest('.track-item');
   if (!item) return;
   const index = parseInt(item.dataset.index);
-  playTrack(index);
+  playTrack(index, state.library);
 });
 
 els.trackList.addEventListener('contextmenu', (e) => {
@@ -659,7 +690,7 @@ $$('.context-item').forEach(item => {
     if (!contextTarget) return;
     const action = item.dataset.action;
     if (action === 'play') {
-      playTrack(contextTarget.index);
+      playTrack(contextTarget.index, state.library);
     } else if (action === 'remove') {
       state.library = state.library.filter(t => t.filePath !== contextTarget.filePath);
       renderTrackList();
@@ -812,8 +843,8 @@ function openPlaylistDetail(playlistId) {
   }
 
   els.playlistTracks.innerHTML = tracks.map((t, i) => `
-    <div class="track-item ${state.currentTrack?.filePath === t.filePath && state.isPlaying ? 'playing' : ''}" 
-         data-index="${state.library.indexOf(t)}" data-path="${escapeHtml(t.filePath)}">
+    <div class="track-item playlist-item ${state.currentTrack?.filePath === t.filePath && state.isPlaying ? 'playing' : ''}" 
+         data-playlist-index="${i}" data-path="${escapeHtml(t.filePath)}">
       <div class="track-item-num"><span>${i + 1}</span></div>
       <div class="track-item-info">
         <div class="track-item-title">${escapeHtml(t.title)}</div>
@@ -821,15 +852,48 @@ function openPlaylistDetail(playlistId) {
       </div>
       <div class="track-item-album">${escapeHtml(t.album)}</div>
       <div class="track-item-format">${t.format}</div>
-      <div class="track-item-duration">${formatTime(t.duration)}</div>
+      <div class="track-item-actions">
+        <span class="track-item-duration">${formatTime(t.duration)}</span>
+        <button class="track-item-remove" title="Listeden kaldır">✕</button>
+      </div>
     </div>`
   ).join('');
 
-  els.playlistTracks.addEventListener('click', (e) => {
-    const item = e.target.closest('.track-item');
-    if (!item) return;
-    playTrack(parseInt(item.dataset.index));
-  });
+  if (!els.playlistTracks.dataset.bound) {
+    els.playlistTracks.dataset.bound = 'true';
+    els.playlistTracks.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('.track-item-remove');
+      if (removeBtn) {
+        const item = e.target.closest('.track-item');
+        const fp = item?.dataset.path;
+        const playlist = state.playlists.find(p => p.id === state.activePlaylistId);
+        if (playlist && fp) {
+          playlist.tracks = playlist.tracks.filter(t => t !== fp);
+          savePlaylists();
+          showToast('Listeden kaldırıldı', 'info');
+          openPlaylistDetail(playlist.id);
+          if (state.playQueue && state.activePlaylistId === playlist.id) {
+            const updated = playlist.tracks
+              .map(p => state.library.find(t => t.filePath === p))
+              .filter(Boolean);
+            state.playQueue = updated;
+            state.currentIndex = updated.findIndex(t => t.filePath === state.currentTrack?.filePath);
+          }
+        }
+        return;
+      }
+
+      const item = e.target.closest('.track-item');
+      if (!item) return;
+      const playlist = state.playlists.find(p => p.id === state.activePlaylistId);
+      if (!playlist) return;
+      const list = playlist.tracks
+        .map(p => state.library.find(t => t.filePath === p))
+        .filter(Boolean);
+      const index = parseInt(item.dataset.playlistIndex);
+      playTrack(index, list);
+    });
+  }
 }
 
 $('#btn-playlist-back').addEventListener('click', () => {
@@ -949,7 +1013,7 @@ function renderDownloads() {
     item.addEventListener('click', () => {
       const fp = item.dataset.path;
       const idx = state.library.findIndex(t => t.filePath === fp);
-      if (idx >= 0) playTrack(idx);
+      if (idx >= 0) playTrack(idx, state.library);
     });
   });
 }
@@ -1793,7 +1857,10 @@ document.addEventListener('drop', (e) => {
 
 // --- Settings ---
 async function loadSettings() {
-  state.settings = await window.electronAPI.loadSettings();
+  const loaded = await window.electronAPI.loadSettings();
+  state.settings = loaded && typeof loaded === 'object' ? loaded : {};
+  if (!state.settings.theme) state.settings.theme = 'dark';
+  applyTheme(state.settings.theme);
 }
 
 async function saveSettingsToFile() {
@@ -1804,12 +1871,22 @@ function renderSettings() {
   const pathEl = $('#settings-download-path');
   const dataPathEl = $('#settings-data-path');
   const countEl = $('#settings-library-count');
+  const themeEl = $('#settings-theme');
   if (pathEl) pathEl.textContent = state.settings.downloadPath || 'Varsayılan';
   if (dataPathEl) {
     window.electronAPI.getDataPath().then(p => { dataPathEl.textContent = p; });
   }
   if (countEl) countEl.textContent = `${state.library.length} şarkı`;
+  if (themeEl) themeEl.value = state.settings.theme || 'dark';
 }
+
+$('#settings-theme')?.addEventListener('change', async (e) => {
+  const theme = e.target.value;
+  state.settings.theme = theme;
+  applyTheme(theme);
+  await saveSettingsToFile();
+  showToast('Tema güncellendi', 'success');
+});
 
 $('#btn-change-download-path').addEventListener('click', async () => {
   const folder = await window.electronAPI.selectFolder();

@@ -286,12 +286,14 @@ const defaultDataPath = app.getPath('userData');
 
 // --- Settings ---
 function loadSettings() {
+  const defaults = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark' };
   try {
     if (fs.existsSync(settingsPath)) {
-      return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+      const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+      return { ...defaults, ...saved };
     }
   } catch (err) {}
-  return { downloadPath: path.join(__dirname, 'downloads'), dataPath: '' };
+  return defaults;
 }
 
 function saveSettings(settings) {
