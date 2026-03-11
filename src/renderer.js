@@ -24,6 +24,8 @@ const state = {
     dataPath: '',
     theme: 'dark',
     language: 'tr',
+    eqPreset: 'flat',
+    eqGains: [],
   },
 };
 
@@ -223,7 +225,7 @@ const translations = {
     'settings.clearLibrary': 'Kütüphaneyi Temizle',
     'settings.clearLibraryDesc': 'Tüm şarkıları kütüphaneden kaldır (dosyalar silinmez)',
     'settings.about': 'Hakkında',
-    'settings.aboutDesc': 'Versiyon 1.5.2 — Modern müzik oynatıcı',
+    'settings.aboutDesc': 'Versiyon 1.5.4 — Modern müzik oynatıcı',
     'theme.dark': 'Koyu',
     'theme.light': 'Açık',
     'theme.ocean': 'Okyanus',
@@ -380,7 +382,7 @@ const translations = {
     'settings.clearLibrary': 'Clear Library',
     'settings.clearLibraryDesc': 'Remove all songs from the library (files are not deleted)',
     'settings.about': 'About',
-    'settings.aboutDesc': 'Version 1.5.2 — Modern music player',
+    'settings.aboutDesc': 'Version 1.5.4 — Modern music player',
     'theme.dark': 'Dark',
     'theme.light': 'Light',
     'theme.ocean': 'Ocean',
@@ -537,7 +539,7 @@ const translations = {
     'settings.clearLibrary': 'مسح المكتبة',
     'settings.clearLibraryDesc': 'إزالة جميع الأغاني من المكتبة (لن تُحذف الملفات)',
     'settings.about': 'حول',
-    'settings.aboutDesc': 'الإصدار 1.5.2 — مشغل موسيقى حديث',
+    'settings.aboutDesc': 'الإصدار 1.5.4 — مشغل موسيقى حديث',
     'theme.dark': 'داكن',
     'theme.light': 'فاتح',
     'theme.ocean': 'محيط',
@@ -694,7 +696,7 @@ const translations = {
     'settings.clearLibrary': 'Svuota libreria',
     'settings.clearLibraryDesc': 'Rimuovi tutti i brani dalla libreria (i file non verranno eliminati)',
     'settings.about': 'Informazioni',
-    'settings.aboutDesc': 'Versione 1.5.2 — Lettore musicale moderno',
+    'settings.aboutDesc': 'Versione 1.5.4 — Lettore musicale moderno',
     'theme.dark': 'Scuro',
     'theme.light': 'Chiaro',
     'theme.ocean': 'Oceano',
@@ -802,6 +804,29 @@ function applyLanguage(lang) {
   });
   const langSelect = $('#settings-language');
   if (langSelect) langSelect.value = normalized;
+}
+
+let eqSaveTimer = null;
+function scheduleEqSave() {
+  if (eqSaveTimer) clearTimeout(eqSaveTimer);
+  eqSaveTimer = setTimeout(() => {
+    saveSettingsToFile();
+    eqSaveTimer = null;
+  }, 200);
+}
+
+function normalizeGains(gains) {
+  return gains.map(v => parseFloat(v));
+}
+
+function findMatchingPreset(gains) {
+  const normalized = normalizeGains(gains);
+  for (const [key, preset] of Object.entries(EQ_PRESETS)) {
+    if (preset.length !== normalized.length) continue;
+    const match = preset.every((v, i) => v === normalized[i]);
+    if (match) return key;
+  }
+  return null;
 }
 
 function getFileNameFromPath(filePath) {
@@ -1528,6 +1553,15 @@ async function savePlaylists() {
   await window.electronAPI.savePlaylists(state.playlists);
 }
 
+function getPlaylistCover(playlist) {
+  if (!playlist?.tracks?.length) return '';
+  for (const fp of playlist.tracks) {
+    const track = state.library.find(t => t.filePath === fp && t.coverArt);
+    if (track?.coverArt) return track.coverArt;
+  }
+  return '';
+}
+
 function renderPlaylists() {
   if (state.playlists.length === 0) {
     els.playlistGrid.innerHTML = `
@@ -1541,14 +1575,20 @@ function renderPlaylists() {
     return;
   }
 
-  els.playlistGrid.innerHTML = state.playlists.map(p => `
+  els.playlistGrid.innerHTML = state.playlists.map(p => {
+    const cover = getPlaylistCover(p);
+    const coverStyle = cover ? `style="background-image:url('${cover}')"` : '';
+    const coverClass = cover ? '' : 'empty';
+    return `
     <div class="playlist-card" data-id="${p.id}">
       <button class="playlist-card-delete" data-delete="${p.id}" title="${t('common.delete')}">✕</button>
-      <div class="playlist-card-icon">🎵</div>
-      <div class="playlist-card-name">${escapeHtml(p.name)}</div>
-      <div class="playlist-card-count">${t('common.songCount', { count: p.tracks.length })}</div>
-    </div>`
-  ).join('');
+      <div class="playlist-card-cover ${coverClass}" ${coverStyle}></div>
+      <div class="playlist-card-body">
+        <div class="playlist-card-name">${escapeHtml(p.name)}</div>
+        <div class="playlist-card-count">${t('common.songCount', { count: p.tracks.length })}</div>
+      </div>
+    </div>`;
+  }).join('');
 
   // Click handlers
   $$('.playlist-card').forEach(card => {
@@ -2190,7 +2230,7 @@ const EQ_PRESETS = {
   vocal:     [-2, -1, 0, 2, 5, 5, 3, 1, 0, -2],
 };
 
-function applyEqPreset(key) {
+function applyEqPreset(key, save = true) {
   const preset = EQ_PRESETS[key];
   if (!preset) return;
   const sliders = $$('.eq-slider');
@@ -2206,6 +2246,9 @@ function applyEqPreset(key) {
       btn.classList.toggle('active', btn.dataset.preset === key);
     });
   }
+  state.settings.eqPreset = key;
+  state.settings.eqGains = [...preset];
+  if (save) scheduleEqSave();
 }
 
 els.eqPreset.addEventListener('change', () => {
@@ -2223,6 +2266,17 @@ $$('.eq-slider').forEach((slider, i) => {
     if (eqFilters[i]) eqFilters[i].gain.value = parseFloat(slider.value);
     const valueEl = slider.parentElement?.querySelector('.eq-value');
     if (valueEl) valueEl.textContent = `${slider.value} dB`;
+    const gains = state.settings.eqGains || [];
+    gains[i] = parseFloat(slider.value);
+    state.settings.eqGains = gains;
+    const matched = findMatchingPreset(state.settings.eqGains);
+    state.settings.eqPreset = matched || 'custom';
+    if (els.eqPresetChips) {
+      els.eqPresetChips.querySelectorAll('.eq-chip').forEach(btn => {
+        btn.classList.toggle('active', matched && btn.dataset.preset === matched);
+      });
+    }
+    scheduleEqSave();
   });
 });
 
@@ -2687,6 +2741,8 @@ async function loadSettings() {
   state.settings = loaded && typeof loaded === 'object' ? loaded : {};
   if (!state.settings.theme) state.settings.theme = 'dark';
   if (!state.settings.language) state.settings.language = 'tr';
+  if (!state.settings.eqPreset) state.settings.eqPreset = 'flat';
+  if (!Array.isArray(state.settings.eqGains)) state.settings.eqGains = [];
   applyTheme(state.settings.theme);
   applyLanguage(state.settings.language);
 }
@@ -2776,11 +2832,32 @@ async function init() {
   renderDownloads();
   renderTrackList();
   applyLibraryView();
-  $$('.eq-slider').forEach((slider) => {
-    const valueEl = slider.parentElement?.querySelector('.eq-value');
-    if (valueEl) valueEl.textContent = `${slider.value} dB`;
-  });
-  applyEqPreset(els.eqPreset?.value || 'flat');
+  const savedGains = Array.isArray(state.settings.eqGains) ? [...state.settings.eqGains] : [];
+  const sliderCount = $$('.eq-slider').length;
+  if (savedGains.length === sliderCount) {
+    state.settings.eqGains = normalizeGains(savedGains);
+    $$('.eq-slider').forEach((slider, i) => {
+      slider.value = state.settings.eqGains[i];
+      if (eqFilters[i]) eqFilters[i].gain.value = state.settings.eqGains[i];
+      const valueEl = slider.parentElement?.querySelector('.eq-value');
+      if (valueEl) valueEl.textContent = `${state.settings.eqGains[i]} dB`;
+    });
+    const matched = findMatchingPreset(state.settings.eqGains);
+    state.settings.eqPreset = matched || 'custom';
+    if (els.eqPresetChips) {
+      els.eqPresetChips.querySelectorAll('.eq-chip').forEach(btn => {
+        btn.classList.toggle('active', matched && btn.dataset.preset === matched);
+      });
+    }
+    if (matched && els.eqPreset) els.eqPreset.value = matched;
+  } else {
+    const savedPreset = state.settings.eqPreset || 'flat';
+    applyEqPreset(savedPreset, false);
+    $$('.eq-slider').forEach((slider) => {
+      const valueEl = slider.parentElement?.querySelector('.eq-value');
+      if (valueEl) valueEl.textContent = `${slider.value} dB`;
+    });
+  }
   startVuMeter();
 }
 
