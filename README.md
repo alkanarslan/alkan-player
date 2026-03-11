@@ -5,7 +5,7 @@ Modern, şık ve güçlü bir masaüstü müzik oynatıcı. Yerel ses dosyaları
 ![Electron](https://img.shields.io/badge/Electron-28-47848F?logo=electron&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-1.4.0-blue)
+![Version](https://img.shields.io/badge/Version-1.5.2-blue)
 
 ---
 
@@ -37,7 +37,7 @@ Modern, şık ve güçlü bir masaüstü müzik oynatıcı. Yerel ses dosyaları
 
 ### 🎨 Kullanıcı Arayüzü
 - Özel çerçevesiz (frameless) pencere tasarımı
-- Koyu tema, modern ve minimal arayüz
+- Çoklu tema ve renk paleti desteği (Koyu, Açık, Okyanus, Amber, Orman, Monokrom)
 - Sidebar navigasyon (Kütüphane, Çalma Listeleri, YouTube, YT Music, Equalizer, Ayarlar)
 - Şarkı arama ve filtreleme
 - Sürükle-bırak desteği
@@ -45,6 +45,7 @@ Modern, şık ve güçlü bir masaüstü müzik oynatıcı. Yerel ses dosyaları
 ### 📋 Çalma Listeleri
 - Özel çalma listeleri oluşturma ve yönetme
 - Çalma listelerini kalıcı olarak saklama
+- Çalma listesinden şarkı kaldırma
 - Karıştırma (shuffle) ve tekrar (repeat) modları
 
 ---
@@ -78,7 +79,7 @@ npm start
 npm run dev
 
 # Windows için kurulum dosyası oluşturma (NSIS installer)
-npm run build
+npm run build:win
 
 # Windows için taşınabilir (portable) sürüm oluşturma
 npm run build:portable
