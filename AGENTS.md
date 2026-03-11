@@ -1,0 +1,22 @@
+These instructions apply to the entire repository.
+- This is an Electron desktop music player.
+- `main.js` owns the main process, BrowserWindow setup, IPC handlers, filesystem access, and YouTube-related integrations.
+- `preload.js` exposes the safe renderer bridge with `contextBridge`.
+- `src/renderer.js` contains the renderer-side UI, playback flow, Web Audio API logic, equalizer, and visualizers.
+- `src/index.html` and `src/styles.css` define the UI structure and styling.
+- `ytmusic.js` contains the YouTube Music client/integration logic.
+- Install dependencies with `npm install`.
+- Start the app with `npm start`.
+- Start in dev mode with `npm run dev`.
+- Build distributables with `npm run build`, or use the platform-specific scripts in `package.json`.
+- Keep changes small and focused; avoid broad refactors unless the task requires them.
+- Preserve the Electron process boundary: privileged or filesystem work belongs in `main.js` or `preload.js`, not directly in renderer code.
+- When adding renderer functionality, prefer wiring new native capabilities through `preload.js` and IPC instead of exposing Node.js APIs directly.
+- Follow the existing vanilla JavaScript, HTML, and CSS style used in the repo.
+- Reuse existing naming and UI patterns instead of introducing new abstractions without need.
+- Update `README.md` when user-facing setup, scripts, or major features change.
+- After code changes, run the smallest relevant verification first.
+- For app-wide changes, prefer at least a smoke check with `npm start` or `npm run dev` when practical.
+- If build packaging is affected, run the narrowest relevant build script instead of all build targets.
+- Do not commit generated outputs or dependencies.
+- Keep `.gitignore` aligned with Electron build artifacts, downloads, and local dependency folders.
