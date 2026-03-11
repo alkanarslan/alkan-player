@@ -2314,7 +2314,7 @@ function startVuMeter() {
   if (!canvas || !analyserL || !analyserR) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const W = 340, H = 96;
+  const W = 420, H = 120;
   canvas.width = W * dpr;
   canvas.height = H * dpr;
   ctx.scale(dpr, dpr);
@@ -2345,9 +2345,26 @@ function startVuMeter() {
     ctx.roundRect(x, y, w, h, 3);
     ctx.clip();
 
-    // Black matte background
-    ctx.fillStyle = '#0c0c0c';
+    // Retro amber backlight background
+    ctx.fillStyle = '#151008';
     ctx.fillRect(x, y, w, h);
+
+    // Subtle top sheen
+    const sheen = ctx.createLinearGradient(x, y, x, y + h);
+    sheen.addColorStop(0, 'rgba(255, 214, 130, 0.12)');
+    sheen.addColorStop(0.2, 'rgba(255, 214, 130, 0.04)');
+    sheen.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sheen;
+    ctx.fillRect(x, y, w, h);
+
+    // Scanline texture
+    ctx.save();
+    ctx.globalAlpha = 0.07;
+    for (let sy = y; sy < y + h; sy += 2) {
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.fillRect(x, sy, w, 1);
+    }
+    ctx.restore();
 
     // Warm amber backlight glow from behind the scale
     const glowStr = 0.12 + 0.03 * Math.sin(glowPhase * 0.6);
@@ -2361,8 +2378,8 @@ function startVuMeter() {
     // Scale arc
     ctx.beginPath();
     ctx.arc(cx, pivotY, R, startA, startA + sweep);
-    ctx.lineWidth = 0.5;
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = 'rgba(255, 220, 150, 0.22)';
     ctx.stroke();
 
     // dB markings — TASCAM style
@@ -2382,9 +2399,9 @@ function startVuMeter() {
     ];
 
     const zoneColors = {
-      green:  '#3ddc84',
-      yellow: '#fbbf24',
-      red:    '#ef4444',
+      green:  '#ffe7a3',
+      yellow: '#ffd166',
+      red:    '#ff6b6b',
     };
 
     ctx.textAlign = 'center';
@@ -2404,9 +2421,9 @@ function startVuMeter() {
       ctx.beginPath();
       ctx.moveTo(ox, oy);
       ctx.lineTo(ix, iy);
-      ctx.lineWidth = m.major ? 1.5 : 0.8;
+      ctx.lineWidth = m.major ? 1.6 : 0.9;
       ctx.strokeStyle = col;
-      ctx.globalAlpha = m.major ? 0.9 : 0.5;
+      ctx.globalAlpha = m.major ? 0.95 : 0.6;
       ctx.stroke();
       ctx.globalAlpha = 1;
 
@@ -2414,32 +2431,32 @@ function startVuMeter() {
         const lr = outerR - tickLen - 9;
         const lx = cx + Math.cos(a) * lr;
         const ly = pivotY + Math.sin(a) * lr;
-        ctx.font = m.major ? 'bold 9px "Courier New", monospace' : '7.5px "Courier New", monospace';
+        ctx.font = m.major ? 'bold 9.5px "Courier New", monospace' : '7.5px "Courier New", monospace';
         ctx.fillStyle = col;
-        ctx.globalAlpha = 0.85;
+        ctx.globalAlpha = 0.95;
         ctx.fillText(m.lbl, lx, ly);
         ctx.globalAlpha = 1;
       }
     }
 
     // Colored zone arcs
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.4;
     ctx.beginPath();
     ctx.arc(cx, pivotY, R - 4, startA, startA + 0.58 * sweep);
-    ctx.strokeStyle = 'rgba(61, 220, 132, 0.2)';
+    ctx.strokeStyle = 'rgba(255, 231, 163, 0.45)';
     ctx.stroke();
     ctx.beginPath();
     ctx.arc(cx, pivotY, R - 4, startA + 0.58 * sweep, startA + 0.72 * sweep);
-    ctx.strokeStyle = 'rgba(251, 191, 36, 0.25)';
+    ctx.strokeStyle = 'rgba(255, 209, 102, 0.55)';
     ctx.stroke();
     ctx.beginPath();
     ctx.arc(cx, pivotY, R - 4, startA + 0.72 * sweep, startA + sweep);
-    ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+    ctx.strokeStyle = 'rgba(255, 107, 107, 0.6)';
     ctx.stroke();
 
     // "VU" text
     ctx.font = 'italic 10px "Courier New", monospace';
-    ctx.fillStyle = 'rgba(255, 195, 50, 0.45)';
+    ctx.fillStyle = 'rgba(255, 224, 160, 0.75)';
     ctx.fillText('VU', cx, pivotY - R * 0.32);
 
     // --- Needle ---
@@ -2466,14 +2483,14 @@ function startVuMeter() {
     ctx.beginPath();
     ctx.moveTo(-6, 0);
     ctx.lineTo(needleLen * 0.7, 0);
-    ctx.lineWidth = 1.8;
-    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.1;
+    ctx.strokeStyle = '#ff3b2e';
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(needleLen * 0.7, 0);
     ctx.lineTo(needleLen, 0);
-    ctx.lineWidth = 0.8;
-    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.0;
+    ctx.strokeStyle = '#ff3b2e';
     ctx.stroke();
     ctx.restore();
 
@@ -2495,14 +2512,14 @@ function startVuMeter() {
     const ledY = y + 7;
     if (peakLed > 0.68) {
       const ledGlow = ctx.createRadialGradient(ledX, ledY, 0, ledX, ledY, 6);
-      ledGlow.addColorStop(0, 'rgba(255, 50, 30, 0.9)');
-      ledGlow.addColorStop(0.5, 'rgba(255, 30, 20, 0.3)');
+      ledGlow.addColorStop(0, 'rgba(255, 70, 40, 0.95)');
+      ledGlow.addColorStop(0.5, 'rgba(255, 40, 20, 0.4)');
       ledGlow.addColorStop(1, 'rgba(255, 0, 0, 0)');
       ctx.fillStyle = ledGlow;
       ctx.fillRect(ledX - 6, ledY - 6, 12, 12);
       ctx.beginPath();
       ctx.arc(ledX, ledY, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#ff3020';
+      ctx.fillStyle = '#ff4a2a';
       ctx.fill();
     } else {
       ctx.beginPath();
@@ -2511,13 +2528,13 @@ function startVuMeter() {
       ctx.fill();
     }
     ctx.font = '6px "Courier New", monospace';
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle = 'rgba(255, 230, 170, 0.5)';
     ctx.textAlign = 'center';
     ctx.fillText('PEAK', ledX, ledY + 8);
 
     // Channel label
     ctx.font = 'bold 11px "Courier New", monospace';
-    ctx.fillStyle = 'rgba(255, 195, 50, 0.55)';
+    ctx.fillStyle = 'rgba(255, 230, 170, 0.7)';
     ctx.textAlign = 'center';
     ctx.fillText(label, cx, y + h - 3);
 
@@ -2548,15 +2565,22 @@ function startVuMeter() {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Dark charcoal housing — TASCAM faceplate
+    // Retro housing — amber tinted bezel
     const housingGrad = ctx.createLinearGradient(0, 0, 0, H);
-    housingGrad.addColorStop(0, '#1a1a1e');
-    housingGrad.addColorStop(0.5, '#141416');
-    housingGrad.addColorStop(1, '#101012');
+    housingGrad.addColorStop(0, '#14110a');
+    housingGrad.addColorStop(0.5, '#110d08');
+    housingGrad.addColorStop(1, '#0c0a07');
     ctx.fillStyle = housingGrad;
     ctx.beginPath();
     ctx.roundRect(0, 0, W, H, 5);
     ctx.fill();
+
+    // Inner glow frame
+    ctx.beginPath();
+    ctx.roundRect(2, 2, W - 4, H - 4, 4);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 220, 140, 0.14)';
+    ctx.stroke();
 
     // Brushed metal texture
     ctx.save();
@@ -2745,6 +2769,7 @@ async function init() {
   audioElement.volume = state.volume;
   els.volumeSlider.value = state.volume * 100;
   drawVolumeKnob();
+  initAudioContext();
   await loadSettings();
   await loadLibrary();
   await loadPlaylists();
@@ -2756,6 +2781,7 @@ async function init() {
     if (valueEl) valueEl.textContent = `${slider.value} dB`;
   });
   applyEqPreset(els.eqPreset?.value || 'flat');
+  startVuMeter();
 }
 
 init();

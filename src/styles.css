@@ -1120,18 +1120,18 @@ body[data-theme="light"] .player-bar {
 }
 
 .vu-meter-canvas {
-  width: 340px;
-  height: 96px;
+  width: 420px;
+  height: 120px;
   flex-shrink: 0;
   margin-left: 12px;
   border-radius: 5px;
-  background: #101012;
-  border: 1px solid rgba(80, 80, 90, 0.4);
+  background: #120d08;
+  border: 1px solid rgba(180, 120, 40, 0.35);
   box-shadow:
-    0 0 15px rgba(255, 190, 50, 0.12),
-    0 0 40px rgba(255, 180, 40, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    0 0 18px rgba(255, 190, 80, 0.2),
+    0 0 40px rgba(160, 80, 30, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
 }
 
 body[data-theme="light"] .vu-meter-canvas {
