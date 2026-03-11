@@ -22,17 +22,17 @@
             </linearGradient>
           </defs>
         </svg>
-        <span>Alkan Player</span>
+        <span data-i18n="app.name">Alkan Player</span>
       </div>
     </div>
     <div class="titlebar-controls">
-      <button class="titlebar-btn" id="btn-minimize" title="Küçült">
+      <button class="titlebar-btn" id="btn-minimize" title="Küçült" data-i18n-title="window.minimize">
         <svg width="12" height="12" viewBox="0 0 12 12"><rect y="5" width="12" height="2" rx="1" fill="currentColor"/></svg>
       </button>
-      <button class="titlebar-btn" id="btn-maximize" title="Büyüt">
+      <button class="titlebar-btn" id="btn-maximize" title="Büyüt" data-i18n-title="window.maximize">
         <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
       </button>
-      <button class="titlebar-btn btn-close" id="btn-close" title="Kapat">
+      <button class="titlebar-btn btn-close" id="btn-close" title="Kapat" data-i18n-title="window.close">
         <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 2L10 10M10 2L2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -46,28 +46,28 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/>
           </svg>
-          <span>Kütüphane</span>
+          <span data-i18n="nav.library">Kütüphane</span>
         </button>
         <button class="nav-item" data-view="playlists">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 18V5l12-2v13" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
           </svg>
-          <span>Çalma Listeleri</span>
+          <span data-i18n="nav.playlists">Çalma Listeleri</span>
         </button>
         <button class="nav-item" data-view="youtube">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 19c-4.3 0-7.8-.4-8.7-.6a2 2 0 01-1.4-1.4C1.5 15.6 1 12 1 12s.5-3.6.9-5a2 2 0 011.4-1.4C4.2 5.4 7.7 5 12 5s7.8.4 8.7.6a2 2 0 011.4 1.4c.4 1.4.9 5 .9 5s-.5 3.6-.9 5a2 2 0 01-1.4 1.4c-.9.2-4.4.6-8.7.6z"/>
             <polygon points="10,8.5 16,12 10,15.5" fill="currentColor"/>
           </svg>
-          <span>YouTube</span>
+          <span data-i18n="nav.youtube">YouTube</span>
         </button>
         <button class="nav-item" data-view="ytmusic">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <polygon points="10,8 16,12 10,16" fill="currentColor"/>
           </svg>
-          <span>YT Music</span>
+          <span data-i18n="nav.ytmusic">YT Music</span>
         </button>
         <button class="nav-item" data-view="equalizer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -81,14 +81,14 @@
             <line x1="9" y1="8" x2="15" y2="8" stroke-linecap="round"/>
             <line x1="17" y1="16" x2="23" y2="16" stroke-linecap="round"/>
           </svg>
-          <span>Equalizer</span>
+          <span data-i18n="nav.equalizer">Equalizer</span>
         </button>
         <button class="nav-item" data-view="settings">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
           </svg>
-          <span>Ayarlar</span>
+          <span data-i18n="nav.settings">Ayarlar</span>
         </button>
       </nav>
 
@@ -97,7 +97,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
           </svg>
-          <span>Dosya Ekle</span>
+          <span data-i18n="nav.addFiles">Dosya Ekle</span>
         </button>
         <button class="nav-item" id="btn-add-folder">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -105,7 +105,7 @@
             <line x1="12" y1="11" x2="12" y2="17" stroke-linecap="round"/>
             <line x1="9" y1="14" x2="15" y2="14" stroke-linecap="round"/>
           </svg>
-          <span>Klasör Ekle</span>
+          <span data-i18n="nav.addFolder">Klasör Ekle</span>
         </button>
       </div>
     </aside>
@@ -117,20 +117,20 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
         </svg>
-        <input type="text" id="search-input" placeholder="Şarkı, sanatçı veya albüm ara...">
+        <input type="text" id="search-input" placeholder="Şarkı, sanatçı veya albüm ara..." data-i18n-placeholder="search.placeholder">
       </div>
 
       <!-- Library View -->
       <div class="view active" id="view-library">
         <div class="view-header">
-          <h2>Kütüphane</h2>
+          <h2 data-i18n="view.library">Kütüphane</h2>
           <div class="view-actions">
-            <button class="btn-ghost" id="btn-sort" title="Sırala">
+            <button class="btn-ghost" id="btn-sort" title="Sırala" data-i18n-title="tooltip.sort">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 6h18M6 12h12M9 18h6" stroke-linecap="round"/>
               </svg>
             </button>
-            <button class="btn-ghost" id="btn-view-toggle" title="Görünüm">
+            <button class="btn-ghost" id="btn-view-toggle" title="Görünüm" data-i18n-title="tooltip.viewToggle">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
                 <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -143,8 +143,8 @@
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
               <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
             </svg>
-            <p>Henüz müzik eklenmedi</p>
-            <p class="sub">Dosya veya klasör ekleyerek başlayın</p>
+            <p data-i18n="empty.noMusic">Henüz müzik eklenmedi</p>
+            <p class="sub" data-i18n="empty.noMusicSub">Dosya veya klasör ekleyerek başlayın</p>
           </div>
         </div>
       </div>
@@ -152,12 +152,12 @@
       <!-- Playlists View -->
       <div class="view" id="view-playlists">
         <div class="view-header">
-          <h2>Çalma Listeleri</h2>
+          <h2 data-i18n="view.playlists">Çalma Listeleri</h2>
           <button class="btn-accent" id="btn-new-playlist">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
             </svg>
-            Yeni Liste
+            <span data-i18n="playlist.new">Yeni Liste</span>
           </button>
         </div>
         <div class="playlist-grid" id="playlist-grid">
@@ -165,13 +165,13 @@
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
               <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/>
             </svg>
-            <p>Henüz çalma listesi yok</p>
-            <p class="sub">Yeni bir çalma listesi oluşturun</p>
+            <p data-i18n="playlist.emptyTitle">Henüz çalma listesi yok</p>
+            <p class="sub" data-i18n="playlist.emptySub">Yeni bir çalma listesi oluşturun</p>
           </div>
         </div>
         <!-- Playlist Detail (hidden by default) -->
         <div class="playlist-detail hidden" id="playlist-detail">
-          <button class="btn-ghost btn-back" id="btn-playlist-back">← Geri</button>
+          <button class="btn-ghost btn-back" id="btn-playlist-back"><span data-i18n="common.back">← Geri</span></button>
           <div class="playlist-detail-header">
             <h3 id="playlist-detail-name"></h3>
             <span class="track-count" id="playlist-track-count"></span>
@@ -183,24 +183,24 @@
       <!-- YouTube View -->
       <div class="view" id="view-youtube">
         <div class="view-header">
-          <h2>YouTube İndir</h2>
+          <h2 data-i18n="view.youtube">YouTube İndir</h2>
         </div>
         <div class="youtube-container">
           <div class="youtube-input-group">
-            <input type="text" id="youtube-url" placeholder="YouTube URL yapıştırın...">
+            <input type="text" id="youtube-url" placeholder="YouTube URL yapıştırın..." data-i18n-placeholder="youtube.urlPlaceholder">
             <button class="btn-accent" id="btn-youtube-download">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              İndir
+              <span data-i18n="youtube.download">İndir</span>
             </button>
           </div>
           <div class="download-status hidden" id="download-status">
             <div class="download-spinner"></div>
-            <span>İndiriliyor...</span>
+            <span data-i18n="youtube.downloading">İndiriliyor...</span>
           </div>
           <div class="download-history" id="download-history">
-            <h3>İndirilen Şarkılar</h3>
+            <h3 data-i18n="youtube.downloaded">İndirilen Şarkılar</h3>
             <div class="download-list" id="download-list"></div>
           </div>
         </div>
@@ -209,9 +209,9 @@
       <!-- YT Music View -->
       <div class="view" id="view-ytmusic">
         <div class="view-header">
-          <h2>YouTube Music</h2>
+          <h2 data-i18n="view.ytmusic">YouTube Music</h2>
           <div class="ytmusic-actions">
-            <button class="btn-ghost btn-sm" id="btn-yt-refresh" title="Yenile">
+            <button class="btn-ghost btn-sm" id="btn-yt-refresh" title="Yenile" data-i18n-title="tooltip.refresh">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
               </svg>
@@ -230,14 +230,14 @@
                 </linearGradient></defs>
               </svg>
             </div>
-            <h3>YouTube Music'e Bağlan</h3>
-            <p>Kişiselleştirilmiş önerilerinizi görmek için Google hesabınızla giriş yapın</p>
-            <button class="btn-accent" id="btn-yt-login">Google ile Giriş Yap</button>
+            <h3 data-i18n="ytmusic.loginTitle">YouTube Music'e Bağlan</h3>
+            <p data-i18n="ytmusic.loginDesc">Kişiselleştirilmiş önerilerinizi görmek için Google hesabınızla giriş yapın</p>
+            <button class="btn-accent" id="btn-yt-login" data-i18n="ytmusic.loginButton">Google ile Giriş Yap</button>
           </div>
           <div class="ytmusic-login-webview hidden" id="ytmusic-login-webview">
             <div class="ytmusic-login-webview-header">
-              <span>Google hesabınızla giriş yapın</span>
-              <button class="btn-ghost btn-sm" id="btn-yt-login-done">Giriş Tamamlandı</button>
+              <span data-i18n="ytmusic.loginHeader">Google hesabınızla giriş yapın</span>
+              <button class="btn-ghost btn-sm" id="btn-yt-login-done" data-i18n="ytmusic.loginDone">Giriş Tamamlandı</button>
             </div>
             <webview id="yt-login-webview" src="" partition="persist:youtube"
               style="width:100%;height:100%;border:none;border-radius:0 0 8px 8px;"></webview>
@@ -250,11 +250,11 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
             </svg>
-            <input type="text" id="ytmusic-search-input" placeholder="YouTube Music'te şarkı ara...">
+            <input type="text" id="ytmusic-search-input" placeholder="YouTube Music'te şarkı ara..." data-i18n-placeholder="ytmusic.searchPlaceholder">
           </div>
 
           <div class="ytmusic-search-results hidden" id="ytmusic-search-results">
-            <div class="ytmusic-section-title">Arama Sonuçları</div>
+            <div class="ytmusic-section-title" data-i18n="ytmusic.searchResults">Arama Sonuçları</div>
             <div class="ytmusic-grid" id="ytmusic-search-grid"></div>
           </div>
 
@@ -264,7 +264,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Geri
+              <span data-i18n="common.back">Geri</span>
             </button>
             <div class="ytmusic-pl-header">
               <div class="ytmusic-pl-thumb" id="ytmusic-pl-thumb"></div>
@@ -279,7 +279,7 @@
           <div class="ytmusic-shelves" id="ytmusic-shelves">
             <div class="ytmusic-loading" id="ytmusic-loading">
               <div class="download-spinner"></div>
-              <span>Öneriler yükleniyor...</span>
+              <span data-i18n="ytmusic.recommendationsLoading">Öneriler yükleniyor...</span>
             </div>
           </div>
         </div>
@@ -288,58 +288,77 @@
       <!-- Equalizer View -->
       <div class="view" id="view-equalizer">
         <div class="view-header">
-          <h2>Equalizer</h2>
+          <h2 data-i18n="view.equalizer">Equalizer</h2>
           <div class="eq-presets">
-            <select id="eq-preset">
-              <option value="flat">Düz</option>
-              <option value="rock">Rock</option>
-              <option value="pop">Pop</option>
-              <option value="jazz">Jazz</option>
-              <option value="classical">Klasik</option>
-              <option value="bass">Bass Boost</option>
-              <option value="vocal">Vokal</option>
+            <select id="eq-preset" class="eq-preset-select">
+              <option value="flat" data-i18n="eq.flat">Düz</option>
+              <option value="rock" data-i18n="eq.rock">Rock</option>
+              <option value="pop" data-i18n="eq.pop">Pop</option>
+              <option value="jazz" data-i18n="eq.jazz">Jazz</option>
+              <option value="classical" data-i18n="eq.classical">Klasik</option>
+              <option value="bass" data-i18n="eq.bass">Bass Boost</option>
+              <option value="vocal" data-i18n="eq.vocal">Vokal</option>
             </select>
+            <div class="eq-preset-chips" id="eq-preset-chips">
+              <button class="eq-chip active" data-preset="flat" data-i18n="eq.flat">Düz</button>
+              <button class="eq-chip" data-preset="rock" data-i18n="eq.rock">Rock</button>
+              <button class="eq-chip" data-preset="pop" data-i18n="eq.pop">Pop</button>
+              <button class="eq-chip" data-preset="jazz" data-i18n="eq.jazz">Jazz</button>
+              <button class="eq-chip" data-preset="classical" data-i18n="eq.classical">Klasik</button>
+              <button class="eq-chip" data-preset="bass" data-i18n="eq.bass">Bass Boost</button>
+              <button class="eq-chip" data-preset="vocal" data-i18n="eq.vocal">Vokal</button>
+            </div>
           </div>
         </div>
         <div class="equalizer-container" id="equalizer-container">
           <div class="eq-band" data-freq="60">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">60</span>
           </div>
           <div class="eq-band" data-freq="170">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">170</span>
           </div>
           <div class="eq-band" data-freq="310">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">310</span>
           </div>
           <div class="eq-band" data-freq="600">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">600</span>
           </div>
           <div class="eq-band" data-freq="1000">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">1K</span>
           </div>
           <div class="eq-band" data-freq="3000">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">3K</span>
           </div>
           <div class="eq-band" data-freq="6000">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">6K</span>
           </div>
           <div class="eq-band" data-freq="12000">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">12K</span>
           </div>
           <div class="eq-band" data-freq="14000">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">14K</span>
           </div>
           <div class="eq-band" data-freq="16000">
             <input type="range" class="eq-slider" min="-12" max="12" value="0" orient="vertical">
+            <span class="eq-value">0 dB</span>
             <span class="eq-label">16K</span>
           </div>
         </div>
@@ -348,83 +367,95 @@
       <!-- Settings View -->
       <div class="view" id="view-settings">
         <div class="view-header">
-          <h2>Ayarlar</h2>
+          <h2 data-i18n="view.settings">Ayarlar</h2>
         </div>
         <div class="settings-container">
           <!-- Appearance -->
           <div class="settings-group">
-            <div class="settings-group-title">Görünüm</div>
+            <div class="settings-group-title" data-i18n="settings.appearance">Görünüm</div>
             <div class="settings-item">
               <div class="settings-item-info">
-                <div class="settings-item-label">Tema</div>
-                <div class="settings-item-desc">Uygulamanın genel görünümünü seçin</div>
+                <div class="settings-item-label" data-i18n="settings.theme">Tema</div>
+                <div class="settings-item-desc" data-i18n="settings.themeDesc">Uygulamanın genel görünümünü seçin</div>
               </div>
               <select id="settings-theme" class="settings-select">
-                <option value="dark">Koyu</option>
-                <option value="light">Açık</option>
-                <option value="ocean">Okyanus</option>
-                <option value="amber">Amber</option>
-                <option value="forest">Orman</option>
-                <option value="mono">Monokrom</option>
+                <option value="dark" data-i18n="theme.dark">Koyu</option>
+                <option value="light" data-i18n="theme.light">Açık</option>
+                <option value="ocean" data-i18n="theme.ocean">Okyanus</option>
+                <option value="amber" data-i18n="theme.amber">Amber</option>
+                <option value="forest" data-i18n="theme.forest">Orman</option>
+                <option value="mono" data-i18n="theme.mono">Monokrom</option>
+              </select>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-info">
+                <div class="settings-item-label" data-i18n="settings.language">Dil</div>
+                <div class="settings-item-desc" data-i18n="settings.languageDesc">Uygulama dilini değiştirin</div>
+              </div>
+              <select id="settings-language" class="settings-select">
+                <option value="tr" data-i18n="lang.tr">Türkçe</option>
+                <option value="en" data-i18n="lang.en">English</option>
+                <option value="ar" data-i18n="lang.ar">العربية</option>
+                <option value="it" data-i18n="lang.it">Italiano</option>
               </select>
             </div>
           </div>
 
           <!-- Download Path -->
           <div class="settings-group">
-            <div class="settings-group-title">İndirme Ayarları</div>
+            <div class="settings-group-title" data-i18n="settings.downloads">İndirme Ayarları</div>
             <div class="settings-item">
               <div class="settings-item-info">
-                <div class="settings-item-label">İndirme Klasörü</div>
-                <div class="settings-item-desc">YouTube'dan indirilen müziklerin kaydedileceği klasör</div>
+                <div class="settings-item-label" data-i18n="settings.downloadPath">İndirme Klasörü</div>
+                <div class="settings-item-desc" data-i18n="settings.downloadDesc">YouTube'dan indirilen müziklerin kaydedileceği klasör</div>
               </div>
               <div class="settings-path-row">
                 <span class="settings-path-value" id="settings-download-path">—</span>
-                <button class="btn-accent btn-sm" id="btn-change-download-path">Değiştir</button>
+                <button class="btn-accent btn-sm" id="btn-change-download-path" data-i18n="common.change">Değiştir</button>
               </div>
             </div>
           </div>
 
           <!-- Data Path -->
           <div class="settings-group">
-            <div class="settings-group-title">Veri Dosyaları</div>
+            <div class="settings-group-title" data-i18n="settings.data">Veri Dosyaları</div>
             <div class="settings-item">
               <div class="settings-item-info">
-                <div class="settings-item-label">Veri Klasörü</div>
-                <div class="settings-item-desc">Kütüphane ve çalma listesi verilerinin saklandığı klasör</div>
+                <div class="settings-item-label" data-i18n="settings.dataPath">Veri Klasörü</div>
+                <div class="settings-item-desc" data-i18n="settings.dataDesc">Kütüphane ve çalma listesi verilerinin saklandığı klasör</div>
               </div>
               <div class="settings-path-row">
                 <span class="settings-path-value" id="settings-data-path">—</span>
-                <button class="btn-accent btn-sm" id="btn-change-data-path">Değiştir</button>
+                <button class="btn-accent btn-sm" id="btn-change-data-path" data-i18n="common.change">Değiştir</button>
               </div>
             </div>
           </div>
 
           <!-- Library Settings -->
           <div class="settings-group">
-            <div class="settings-group-title">Kütüphane</div>
+            <div class="settings-group-title" data-i18n="settings.library">Kütüphane</div>
             <div class="settings-item">
               <div class="settings-item-info">
-                <div class="settings-item-label">Kütüphanedeki Şarkı Sayısı</div>
+                <div class="settings-item-label" data-i18n="settings.libraryCount">Kütüphanedeki Şarkı Sayısı</div>
                 <div class="settings-item-desc" id="settings-library-count">0 şarkı</div>
               </div>
             </div>
             <div class="settings-item">
               <div class="settings-item-info">
-                <div class="settings-item-label">Kütüphaneyi Temizle</div>
-                <div class="settings-item-desc">Tüm şarkıları kütüphaneden kaldır (dosyalar silinmez)</div>
+                <div class="settings-item-label" data-i18n="settings.clearLibrary">Kütüphaneyi Temizle</div>
+                <div class="settings-item-desc" data-i18n="settings.clearLibraryDesc">Tüm şarkıları kütüphaneden kaldır (dosyalar silinmez)</div>
               </div>
-              <button class="btn-danger btn-sm" id="btn-clear-library">Temizle</button>
+              <button class="btn-danger btn-sm" id="btn-clear-library" data-i18n="common.clear">Temizle</button>
             </div>
           </div>
 
           <!-- About -->
           <div class="settings-group">
-            <div class="settings-group-title">Hakkında</div>
+            <div class="settings-group-title" data-i18n="settings.about">Hakkında</div>
             <div class="settings-item">
               <div class="settings-item-info">
-                <div class="settings-item-label">Alkan Player</div>
-                <div class="settings-item-desc">Versiyon 1.5.0 — Modern müzik oynatıcı</div>
+                <div class="settings-item-label" data-i18n="app.name">Alkan Player</div>
+                <div class="settings-item-desc" data-i18n="settings.aboutDesc">Versiyon 1.5.2 — Modern müzik oynatıcı</div>
               </div>
             </div>
           </div>
@@ -453,36 +484,36 @@
           </svg>
         </div>
         <div class="track-info">
-          <div class="track-title" id="track-title">Şarkı seçin</div>
+          <div class="track-title" id="track-title" data-i18n="player.selectSong">Şarkı seçin</div>
           <div class="track-artist" id="track-artist">—</div>
         </div>
       </div>
 
       <!-- Controls -->
       <div class="player-controls">
-        <button class="ctrl-btn" id="btn-shuffle" title="Karışık">
+        <button class="ctrl-btn" id="btn-shuffle" title="Karışık" data-i18n-title="tooltip.shuffle">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
             <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
             <line x1="4" y1="4" x2="9" y2="9"/>
           </svg>
         </button>
-        <button class="ctrl-btn" id="btn-prev" title="Önceki">
+        <button class="ctrl-btn" id="btn-prev" title="Önceki" data-i18n-title="tooltip.prev">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
           </svg>
         </button>
-        <button class="ctrl-btn ctrl-play" id="btn-play" title="Çal/Duraklat">
+        <button class="ctrl-btn ctrl-play" id="btn-play" title="Çal/Duraklat" data-i18n-title="tooltip.playPause">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" id="play-icon">
             <polygon points="6,3 20,12 6,21"/>
           </svg>
         </button>
-        <button class="ctrl-btn" id="btn-next" title="Sonraki">
+        <button class="ctrl-btn" id="btn-next" title="Sonraki" data-i18n-title="tooltip.next">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16 6h2v12h-2zm-10 0l8.5 6L6 18z"/>
           </svg>
         </button>
-        <button class="ctrl-btn" id="btn-repeat" title="Tekrarla">
+        <button class="ctrl-btn" id="btn-repeat" title="Tekrarla" data-i18n-title="tooltip.repeat">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/>
             <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
@@ -497,7 +528,7 @@
           <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
         </span>
         <div class="volume-control">
-          <div class="volume-knob-wrapper" id="volume-knob-wrapper" title="Ses">
+          <div class="volume-knob-wrapper" id="volume-knob-wrapper" title="Ses" data-i18n-title="tooltip.volume">
             <canvas id="volume-knob-canvas" class="volume-knob-canvas" width="128" height="128"></canvas>
             <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="80" style="display:none">
           </div>
@@ -508,10 +539,10 @@
 
   <!-- Context Menu -->
   <div class="context-menu hidden" id="context-menu">
-    <button class="context-item" data-action="play">▶ Çal</button>
-    <button class="context-item" data-action="add-to-playlist">📋 Listeye Ekle</button>
-    <button class="context-item" data-action="remove">🗑 Kaldır</button>
-    <button class="context-item" data-action="reveal">📁 Dosya Konumunu Aç</button>
+    <button class="context-item" data-action="play" data-i18n="context.play">▶ Çal</button>
+    <button class="context-item" data-action="add-to-playlist" data-i18n="context.addToPlaylist">📋 Listeye Ekle</button>
+    <button class="context-item" data-action="remove" data-i18n="context.remove">🗑 Kaldır</button>
+    <button class="context-item" data-action="reveal" data-i18n="context.reveal">📁 Dosya Konumunu Aç</button>
   </div>
 
   <!-- Toast Notification -->

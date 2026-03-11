@@ -286,7 +286,7 @@ const defaultDataPath = app.getPath('userData');
 
 // --- Settings ---
 function loadSettings() {
-  const defaults = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark' };
+  const defaults = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark', language: 'tr' };
   try {
     if (fs.existsSync(settingsPath)) {
       const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
