@@ -147,7 +147,8 @@ ipcMain.handle('get-metadata', async (event, filePath) => {
     let coverArt = null;
     if (metadata.common.picture && metadata.common.picture.length > 0) {
       const pic = metadata.common.picture[0];
-      coverArt = `data:${pic.format};base64,${pic.data.toString('base64')}`;
+      const buffer = Buffer.isBuffer(pic.data) ? pic.data : Buffer.from(pic.data);
+      coverArt = `data:${pic.format};base64,${buffer.toString('base64')}`;
     }
     return {
       title: metadata.common.title || path.basename(filePath, path.extname(filePath)),
@@ -180,6 +181,139 @@ ipcMain.handle('read-file-buffer', async (event, filePath) => {
     return buffer;
   } catch (err) {
     return null;
+  }
+});
+
+// --- Spotify Playlist Import ---
+ipcMain.handle('spotify-get-playlist', async (event, playlistUrl) => {
+  try {
+    const https = require('https');
+    // Extract playlist ID from URL
+    const match = playlistUrl.match(/playlist[/:]([a-zA-Z0-9]+)/);
+    if (!match) return { success: false, error: 'Geçersiz Spotify playlist linki' };
+    const playlistId = match[1];
+
+    // Use Spotify embed page to scrape track list (no API key needed)
+    const html = await new Promise((resolve, reject) => {
+      https.get(`https://open.spotify.com/embed/playlist/${playlistId}`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      }, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          https.get(res.headers.location, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+          }, (res2) => {
+            const chunks = [];
+            res2.on('data', c => chunks.push(c));
+            res2.on('end', () => resolve(Buffer.concat(chunks).toString()));
+            res2.on('error', reject);
+          }).on('error', reject);
+          return;
+        }
+        const chunks = [];
+        res.on('data', c => chunks.push(c));
+        res.on('end', () => resolve(Buffer.concat(chunks).toString()));
+        res.on('error', reject);
+      }).on('error', reject);
+    });
+
+    // Try to extract from __NEXT_DATA__ or resource script
+    let tracks = [];
+
+    // Method 1: Try oembed API for title
+    let playlistTitle = 'Spotify Playlist';
+    try {
+      const oembedData = await new Promise((resolve, reject) => {
+        https.get(`https://open.spotify.com/oembed?url=https://open.spotify.com/playlist/${playlistId}`, {
+          headers: { 'User-Agent': 'Mozilla/5.0' }
+        }, (res) => {
+          const chunks = [];
+          res.on('data', c => chunks.push(c));
+          res.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString())); } catch(e) { resolve({}); } });
+          res.on('error', reject);
+        }).on('error', reject);
+      });
+      if (oembedData.title) playlistTitle = oembedData.title;
+    } catch(e) {}
+
+    // Method 2: Parse embed HTML for track data
+    // Look for JSON data in script tags
+    const scriptMatch = html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    if (scriptMatch) {
+      try {
+        const data = JSON.parse(scriptMatch[1]);
+        const entity = data?.props?.pageProps?.state?.data?.entity;
+        if (entity?.trackList) {
+          tracks = entity.trackList.map(t => ({
+            title: t.title || '',
+            artist: t.subtitle || '',
+            duration: t.duration || 0,
+          }));
+        }
+      } catch(e) {}
+    }
+
+    // Method 3: Regex fallback for track titles/artists from HTML
+    if (tracks.length === 0) {
+      const trackMatches = html.matchAll(/"track":\s*\{[^}]*"name"\s*:\s*"([^"]+)"[^}]*"artists":\s*\[\s*\{[^}]*"name"\s*:\s*"([^"]+)"/g);
+      for (const m of trackMatches) {
+        tracks.push({ title: m[1], artist: m[2], duration: 0 });
+      }
+    }
+
+    // Method 4: More general pattern
+    if (tracks.length === 0) {
+      const nameMatches = [...html.matchAll(/"name"\s*:\s*"([^"]{2,80})"/g)];
+      // Filter likely track names (heuristic)
+      const filtered = nameMatches.map(m => m[1]).filter(n => !n.includes('spotify') && !n.includes('Spotify') && n.length > 2);
+      // Take unique names as potential tracks
+      const unique = [...new Set(filtered)];
+      if (unique.length > 1) {
+        tracks = unique.map(name => ({ title: name, artist: '', duration: 0 }));
+      }
+    }
+
+    if (tracks.length === 0) {
+      return { success: false, error: 'Playlist içeriği alınamadı. Playlist herkese açık mı kontrol edin.' };
+    }
+
+    return { success: true, title: playlistTitle, tracks };
+  } catch (err) {
+    console.error('Spotify import error:', err);
+    return { success: false, error: err.message || 'Playlist alınamadı' };
+  }
+});
+
+// YouTube search (for Spotify import matching)
+ipcMain.handle('youtube-search', async (event, query) => {
+  try {
+    const { execFile } = require('child_process');
+    const { promisify } = require('util');
+    const execFileAsync = promisify(execFile);
+    const ytdlpPath = getYtdlpPath();
+    const baseArgs = getYtdlpBaseArgs();
+
+    const { stdout } = await execFileAsync(ytdlpPath, [
+      `ytsearch1:${query}`,
+      '--dump-single-json',
+      '--default-search', 'ytsearch',
+      '--no-playlist',
+      ...baseArgs,
+    ], { maxBuffer: 10 * 1024 * 1024, timeout: 30000 });
+
+    const info = JSON.parse(stdout);
+    const entry = info.entries?.[0] || info;
+    if (!entry?.id) return { success: false, error: 'Sonuç bulunamadı' };
+
+    return {
+      success: true,
+      videoId: entry.id,
+      title: entry.title || query,
+      url: `https://www.youtube.com/watch?v=${entry.id}`,
+      duration: entry.duration || 0,
+      thumbnail: entry.thumbnail || entry.thumbnails?.[0]?.url || '',
+    };
+  } catch (err) {
+    return { success: false, error: err.message || 'Arama başarısız' };
   }
 });
 
@@ -286,7 +420,7 @@ const defaultDataPath = app.getPath('userData');
 
 // --- Settings ---
 function loadSettings() {
-  const defaults = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark', language: 'tr', eqPreset: 'flat', eqGains: [] };
+  const defaults = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark', language: 'tr', eqPreset: 'flat', eqGains: [], balance: 0 };
   try {
     if (fs.existsSync(settingsPath)) {
       const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
