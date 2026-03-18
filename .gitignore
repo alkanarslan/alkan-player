@@ -50,3 +50,5 @@ yarn-error.log*
 tmp/
 temp/
 *.tmp
+
+nul

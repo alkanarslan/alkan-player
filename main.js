@@ -4,6 +4,7 @@ const fs = require('fs');
 const mm = require('music-metadata');
 const NodeID3 = require('node-id3');
 const ytmusic = require('./ytmusic');
+const database = require('./database');
 
 // Resolve paths for binaries (handles asar unpacking)
 function resolveUnpackedPath(p) {
@@ -53,6 +54,11 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
 
+  // Handle file/folder drops at the native level
+  mainWindow.webContents.on('will-navigate', (e) => {
+    e.preventDefault();
+  });
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
@@ -62,9 +68,13 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  initDatabase();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
+  database.close();
   if (process.platform !== 'darwin') app.quit();
 });
 
@@ -121,6 +131,11 @@ ipcMain.handle('open-folder', async () => {
   return scanFolder(result.filePaths[0]);
 });
 
+// Scan a given folder path (for drag-and-drop)
+ipcMain.handle('scan-folder-path', async (event, dirPath) => {
+  return scanFolder(dirPath);
+});
+
 // Scan folder recursively for audio files
 function scanFolder(dirPath) {
   let audioFiles = [];
@@ -140,6 +155,27 @@ function scanFolder(dirPath) {
   return audioFiles;
 }
 
+// Find cover art image in the same folder as the audio file
+const COVER_FILENAMES = ['cover.jpg', 'cover.png', 'folder.jpg', 'folder.png', 'album.jpg', 'album.png', 'front.jpg', 'front.png', 'artwork.jpg', 'artwork.png'];
+
+function findFolderCover(filePath) {
+  try {
+    const dir = path.dirname(filePath);
+    const files = fs.readdirSync(dir);
+    for (const name of COVER_FILENAMES) {
+      const match = files.find(f => f.toLowerCase() === name);
+      if (match) {
+        const coverPath = path.join(dir, match);
+        const ext = path.extname(match).toLowerCase();
+        const mime = ext === '.png' ? 'image/png' : 'image/jpeg';
+        const data = fs.readFileSync(coverPath);
+        return `data:${mime};base64,${data.toString('base64')}`;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 // Read audio metadata
 ipcMain.handle('get-metadata', async (event, filePath) => {
   try {
@@ -149,6 +185,10 @@ ipcMain.handle('get-metadata', async (event, filePath) => {
       const pic = metadata.common.picture[0];
       const buffer = Buffer.isBuffer(pic.data) ? pic.data : Buffer.from(pic.data);
       coverArt = `data:${pic.format};base64,${buffer.toString('base64')}`;
+    }
+    // Fallback: look for cover image in the same folder
+    if (!coverArt) {
+      coverArt = findFolderCover(filePath);
     }
     return {
       title: metadata.common.title || path.basename(filePath, path.extname(filePath)),
@@ -161,12 +201,14 @@ ipcMain.handle('get-metadata', async (event, filePath) => {
       sampleRate: metadata.format.sampleRate || null,
     };
   } catch (err) {
+    // Even on error, try to find folder cover
+    const coverArt = findFolderCover(filePath);
     return {
       title: path.basename(filePath, path.extname(filePath)),
       artist: 'Bilinmeyen Sanatçı',
       album: 'Bilinmeyen Albüm',
       duration: 0,
-      coverArt: null,
+      coverArt,
       format: path.extname(filePath).substring(1).toUpperCase(),
       bitrate: null,
       sampleRate: null,
@@ -414,37 +456,44 @@ ipcMain.handle('youtube-download', async (event, url) => {
   }
 });
 
-// Save/Load playlists
-const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+// --- Database & Settings ---
+const SETTINGS_DEFAULTS = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark', language: 'tr', eqPreset: 'flat', eqGains: [], balance: 0 };
 const defaultDataPath = app.getPath('userData');
 
-// --- Settings ---
-function loadSettings() {
-  const defaults = { downloadPath: path.join(__dirname, 'downloads'), dataPath: '', theme: 'dark', language: 'tr', eqPreset: 'flat', eqGains: [], balance: 0 };
-  try {
-    if (fs.existsSync(settingsPath)) {
-      const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-      return { ...defaults, ...saved };
-    }
-  } catch (err) {}
-  return defaults;
-}
-
-function saveSettings(settings) {
-  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-}
+// Old JSON paths (for migration)
+const oldSettingsPath = path.join(app.getPath('userData'), 'settings.json');
 
 function getDataPath() {
-  const settings = loadSettings();
+  const settings = database.loadSettings(SETTINGS_DEFAULTS);
   return settings.dataPath || defaultDataPath;
 }
 
-function getPlaylistsPath() {
-  return path.join(getDataPath(), 'playlists.json');
+function initDatabase() {
+  const dbPath = path.join(app.getPath('userData'), 'alkan-player.db');
+
+  // Determine old JSON paths for migration
+  // First try to read dataPath from old settings.json
+  let oldDataPath = defaultDataPath;
+  try {
+    if (fs.existsSync(oldSettingsPath)) {
+      const oldSettings = JSON.parse(fs.readFileSync(oldSettingsPath, 'utf-8'));
+      if (oldSettings.dataPath) oldDataPath = oldSettings.dataPath;
+    }
+  } catch (e) {}
+
+  database.init(dbPath, {
+    settings: oldSettingsPath,
+    library: path.join(oldDataPath, 'library.json'),
+    playlists: path.join(oldDataPath, 'playlists.json'),
+  });
 }
 
-function getLibraryPath() {
-  return path.join(getDataPath(), 'library.json');
+function loadSettings() {
+  return database.loadSettings(SETTINGS_DEFAULTS);
+}
+
+function saveSettings(settings) {
+  database.saveSettings(settings);
 }
 
 ipcMain.handle('load-settings', async () => {
@@ -471,46 +520,40 @@ ipcMain.handle('select-folder', async () => {
 // --- Library Persistence ---
 ipcMain.handle('save-library', async (event, library) => {
   try {
-    const p = getLibraryPath();
-    const dir = path.dirname(p);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(p, JSON.stringify(library, null, 2));
+    database.saveLibrary(library);
     return true;
   } catch (err) {
+    console.error('Save library error:', err.message);
     return false;
   }
 });
 
 ipcMain.handle('load-library', async () => {
   try {
-    const p = getLibraryPath();
-    if (fs.existsSync(p)) {
-      return JSON.parse(fs.readFileSync(p, 'utf-8'));
-    }
-  } catch (err) {}
-  return [];
+    return database.loadLibrary();
+  } catch (err) {
+    console.error('Load library error:', err.message);
+    return [];
+  }
 });
 
 ipcMain.handle('save-playlists', async (event, playlists) => {
   try {
-    const p = getPlaylistsPath();
-    const dir = path.dirname(p);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(p, JSON.stringify(playlists, null, 2));
+    database.savePlaylists(playlists);
     return true;
   } catch (err) {
+    console.error('Save playlists error:', err.message);
     return false;
   }
 });
 
 ipcMain.handle('load-playlists', async () => {
   try {
-    const p = getPlaylistsPath();
-    if (fs.existsSync(p)) {
-      return JSON.parse(fs.readFileSync(p, 'utf-8'));
-    }
-  } catch (err) {}
-  return [];
+    return database.loadPlaylists();
+  } catch (err) {
+    console.error('Load playlists error:', err.message);
+    return [];
+  }
 });
 
 // Get downloads folder path

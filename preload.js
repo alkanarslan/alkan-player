@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Window controls
@@ -9,8 +9,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // File operations
   openFiles: () => ipcRenderer.invoke('open-files'),
   openFolder: () => ipcRenderer.invoke('open-folder'),
+  scanFolderPath: (dirPath) => ipcRenderer.invoke('scan-folder-path', dirPath),
   getMetadata: (filePath) => ipcRenderer.invoke('get-metadata', filePath),
   readFileBuffer: (filePath) => ipcRenderer.invoke('read-file-buffer', filePath),
+  getPathForFile: (file) => webUtils.getPathForFile(file),
 
   // YouTube
   youtubeDownload: (url) => ipcRenderer.invoke('youtube-download', url),

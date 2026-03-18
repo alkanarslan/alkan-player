@@ -16,7 +16,9 @@ const state = {
   activePlaylistId: null,
   playQueue: null,
   librarySort: "added",
-  libraryView: "detailed",
+  libraryView: "album",
+  albumDetailView: null,
+  artistDetailView: null,
   searchQuery: "",
   downloads: [],
   settings: {
@@ -327,6 +329,27 @@ const translations = {
     "toast.sortAlbum": "Sıralama: Albüm",
     "toast.viewDetailed": "Görünüm: Detaylı",
     "toast.viewCompact": "Görünüm: Kompakt",
+    "toast.viewAlbum": "Görünüm: Albüm",
+    "toast.viewArtist": "Görünüm: Sanatçı",
+    "album.track": "şarkı",
+    "album.tracks": "şarkı",
+    "album.playAll": "Tümünü Çal",
+    "album.backToAlbums": "Albümler",
+    "album.remove": "Albümü Kaldır",
+    "modal.removeAlbumTitle": "Albümü Kaldır",
+    "modal.removeAlbumConfirm":
+      "Bu albümdeki tüm şarkılar kütüphaneden kaldırılacak. Dosyalar silinmez. Devam etmek istiyor musunuz?",
+    "toast.albumRemoved": "{name} albümü kaldırıldı",
+    "artist.track": "şarkı",
+    "artist.tracks": "şarkı",
+    "artist.albums": "albüm",
+    "artist.playAll": "Tümünü Çal",
+    "artist.backToArtists": "Sanatçılar",
+    "artist.remove": "Sanatçıyı Kaldır",
+    "modal.removeArtistTitle": "Sanatçıyı Kaldır",
+    "modal.removeArtistConfirm":
+      "Bu sanatçının tüm şarkıları kütüphaneden kaldırılacak. Dosyalar silinmez. Devam etmek istiyor musunuz?",
+    "toast.artistRemoved": "{name} sanatçısı kaldırıldı",
     "modal.newPlaylistTitle": "Yeni Çalma Listesi",
     "modal.newPlaylistPlaceholder": "Liste adı...",
     "modal.clearLibraryTitle": "Kütüphaneyi Temizle",
@@ -495,6 +518,27 @@ const translations = {
     "toast.sortAlbum": "Sort: Album",
     "toast.viewDetailed": "View: Detailed",
     "toast.viewCompact": "View: Compact",
+    "toast.viewAlbum": "View: Albums",
+    "toast.viewArtist": "View: Artists",
+    "album.track": "track",
+    "album.tracks": "tracks",
+    "album.playAll": "Play All",
+    "album.backToAlbums": "Albums",
+    "album.remove": "Remove Album",
+    "modal.removeAlbumTitle": "Remove Album",
+    "modal.removeAlbumConfirm":
+      "All songs in this album will be removed from the library. Files will not be deleted. Continue?",
+    "toast.albumRemoved": "{name} album removed",
+    "artist.track": "track",
+    "artist.tracks": "tracks",
+    "artist.albums": "albums",
+    "artist.playAll": "Play All",
+    "artist.backToArtists": "Artists",
+    "artist.remove": "Remove Artist",
+    "modal.removeArtistTitle": "Remove Artist",
+    "modal.removeArtistConfirm":
+      "All songs by this artist will be removed from the library. Files will not be deleted. Continue?",
+    "toast.artistRemoved": "{name} artist removed",
     "modal.newPlaylistTitle": "New Playlist",
     "modal.newPlaylistPlaceholder": "Playlist name...",
     "modal.clearLibraryTitle": "Clear Library",
@@ -656,6 +700,27 @@ const translations = {
     "toast.sortAlbum": "الفرز: الألبوم",
     "toast.viewDetailed": "العرض: تفصيلي",
     "toast.viewCompact": "العرض: مضغوط",
+    "toast.viewAlbum": "العرض: ألبومات",
+    "toast.viewArtist": "العرض: فنانون",
+    "album.track": "أغنية",
+    "album.tracks": "أغاني",
+    "album.playAll": "تشغيل الكل",
+    "album.backToAlbums": "الألبومات",
+    "album.remove": "إزالة الألبوم",
+    "modal.removeAlbumTitle": "إزالة الألبوم",
+    "modal.removeAlbumConfirm":
+      "ستتم إزالة جميع الأغاني في هذا الألبوم من المكتبة. لن يتم حذف الملفات. هل تريد المتابعة؟",
+    "toast.albumRemoved": "تم إزالة ألبوم {name}",
+    "artist.track": "أغنية",
+    "artist.tracks": "أغاني",
+    "artist.albums": "ألبومات",
+    "artist.playAll": "تشغيل الكل",
+    "artist.backToArtists": "الفنانون",
+    "artist.remove": "إزالة الفنان",
+    "modal.removeArtistTitle": "إزالة الفنان",
+    "modal.removeArtistConfirm":
+      "ستتم إزالة جميع أغاني هذا الفنان من المكتبة. لن يتم حذف الملفات. هل تريد المتابعة؟",
+    "toast.artistRemoved": "تم إزالة الفنان {name}",
     "modal.newPlaylistTitle": "قائمة تشغيل جديدة",
     "modal.newPlaylistPlaceholder": "اسم القائمة...",
     "modal.clearLibraryTitle": "مسح المكتبة",
@@ -824,6 +889,27 @@ const translations = {
     "toast.sortAlbum": "Ordine: Album",
     "toast.viewDetailed": "Vista: Dettagliata",
     "toast.viewCompact": "Vista: Compatta",
+    "toast.viewAlbum": "Vista: Album",
+    "toast.viewArtist": "Vista: Artisti",
+    "album.track": "brano",
+    "album.tracks": "brani",
+    "album.playAll": "Riproduci tutto",
+    "album.backToAlbums": "Album",
+    "album.remove": "Rimuovi album",
+    "modal.removeAlbumTitle": "Rimuovi album",
+    "modal.removeAlbumConfirm":
+      "Tutti i brani di questo album verranno rimossi dalla libreria. I file non verranno eliminati. Continuare?",
+    "toast.albumRemoved": "Album {name} rimosso",
+    "artist.track": "brano",
+    "artist.tracks": "brani",
+    "artist.albums": "album",
+    "artist.playAll": "Riproduci tutto",
+    "artist.backToArtists": "Artisti",
+    "artist.remove": "Rimuovi artista",
+    "modal.removeArtistTitle": "Rimuovi artista",
+    "modal.removeArtistConfirm":
+      "Tutti i brani di questo artista verranno rimossi dalla libreria. I file non verranno eliminati. Continuare?",
+    "toast.artistRemoved": "Artista {name} rimosso",
     "modal.newPlaylistTitle": "Nuova playlist",
     "modal.newPlaylistPlaceholder": "Nome playlist...",
     "modal.clearLibraryTitle": "Svuota libreria",
@@ -990,6 +1076,7 @@ async function loadLibrary() {
   }
   renderTrackList();
   // Load cover art in background
+  let coverLoaded = 0;
   for (let i = 0; i < state.library.length; i++) {
     if (!state.library[i].coverArt) {
       try {
@@ -999,13 +1086,22 @@ async function loadLibrary() {
         const normalizedCover = normalizeCoverArt(meta?.coverArt);
         if (normalizedCover) {
           state.library[i].coverArt = normalizedCover;
+          coverLoaded++;
           if (state.currentTrack?.filePath === state.library[i].filePath) {
             state.currentTrack.coverArt = normalizedCover;
             updateNowPlaying();
           }
+          // Re-render periodically so album covers appear progressively
+          if (coverLoaded % 20 === 0) {
+            renderTrackList();
+          }
         }
       } catch (e) {}
     }
+  }
+  // Final re-render to show all loaded cover art
+  if (coverLoaded > 0) {
+    renderTrackList();
   }
 }
 
@@ -1036,6 +1132,22 @@ function getSortedLibrary(tracks) {
 }
 
 function renderTrackList() {
+  if (state.libraryView === "album" && !state.albumDetailView) {
+    renderAlbumView();
+    return;
+  }
+  if (state.libraryView === "album" && state.albumDetailView) {
+    renderAlbumDetail(state.albumDetailView);
+    return;
+  }
+  if (state.libraryView === "artist" && !state.artistDetailView) {
+    renderArtistView();
+    return;
+  }
+  if (state.libraryView === "artist" && state.artistDetailView) {
+    renderArtistDetail(state.artistDetailView);
+    return;
+  }
   const tracks = getSortedLibrary(getFilteredLibrary());
   if (tracks.length === 0) {
     els.trackList.innerHTML = `
@@ -1067,9 +1179,349 @@ function renderTrackList() {
     .join("");
 }
 
+function renderAlbumView() {
+  const tracks = getSortedLibrary(getFilteredLibrary());
+  if (tracks.length === 0) {
+    els.trackList.innerHTML = `
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+        <p>${state.searchQuery ? t("empty.noResults") : t("empty.noMusic")}</p>
+        <p class="sub">${state.searchQuery ? t("empty.noResultsSub") : t("empty.noMusicSub")}</p>
+      </div>`;
+    return;
+  }
+
+  // Group tracks by album
+  const albumMap = new Map();
+  tracks.forEach((track) => {
+    const key = track.album || "Bilinmeyen Albüm";
+    if (!albumMap.has(key)) {
+      albumMap.set(key, {
+        name: key,
+        artist: track.artist,
+        coverArt: track.coverArt || null,
+        tracks: [],
+      });
+    }
+    const album = albumMap.get(key);
+    album.tracks.push(track);
+    // Use the first available cover art
+    if (!album.coverArt && track.coverArt) {
+      album.coverArt = track.coverArt;
+    }
+  });
+
+  const albums = Array.from(albumMap.values());
+
+  els.trackList.innerHTML = albums
+    .map((album) => {
+      const coverStyle = album.coverArt
+        ? `background-image: url('${album.coverArt}')`
+        : "";
+      const coverClass = album.coverArt ? "" : " empty";
+      const artistList = [...new Set(album.tracks.map((t) => t.artist))];
+      const artistText = artistList.length > 2
+        ? artistList.slice(0, 2).join(", ") + "..."
+        : artistList.join(", ");
+      return `
+      <div class="album-card" data-album="${escapeHtml(album.name)}">
+        <div class="album-card-cover${coverClass}" style="${coverStyle}">
+          <span class="album-card-cover-label">${escapeHtml(album.name)}</span>
+          <button class="album-card-remove" data-album-remove="${escapeHtml(album.name)}" title="${t("album.remove")}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <button class="album-card-play" data-album-play="${escapeHtml(album.name)}">
+            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          </button>
+        </div>
+        <div class="album-card-body">
+          <div class="album-card-name" title="${escapeHtml(album.name)}">${escapeHtml(album.name)}</div>
+          <div class="album-card-artist" title="${escapeHtml(artistText)}">${escapeHtml(artistText)}</div>
+          <div class="album-card-count">${album.tracks.length} ${album.tracks.length === 1 ? t("album.track") : t("album.tracks")}</div>
+        </div>
+      </div>`;
+    })
+    .join("");
+}
+
+function renderAlbumDetail(albumName) {
+  const allTracks = getSortedLibrary(getFilteredLibrary());
+  const albumTracks = allTracks.filter(
+    (t) => (t.album || "Bilinmeyen Albüm") === albumName,
+  );
+  if (albumTracks.length === 0) {
+    state.albumDetailView = null;
+    renderAlbumView();
+    return;
+  }
+
+  const coverArt = albumTracks.find((t) => t.coverArt)?.coverArt;
+  const artistList = [...new Set(albumTracks.map((t) => t.artist))];
+  const artistText = artistList.join(", ");
+  const totalDuration = albumTracks.reduce((sum, t) => sum + (t.duration || 0), 0);
+  const coverStyle = coverArt ? `background-image: url('${coverArt}')` : "";
+  const coverClass = coverArt ? "album-detail-cover" : "album-detail-cover empty";
+
+  const headerHtml = `
+    <div class="album-detail-header">
+      <div class="${coverClass}" style="${coverStyle}">${coverArt ? "" : "♪"}</div>
+      <div class="album-detail-info">
+        <div class="album-detail-title" title="${escapeHtml(albumName)}">${escapeHtml(albumName)}</div>
+        <div class="album-detail-artist">${escapeHtml(artistText)}</div>
+        <div class="album-detail-meta">${albumTracks.length} ${albumTracks.length === 1 ? t("album.track") : t("album.tracks")} · ${formatTime(totalDuration)}</div>
+        <div class="album-detail-actions">
+          <button class="album-detail-play-btn" data-album-play-all="${escapeHtml(albumName)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+            ${t("album.playAll")}
+          </button>
+          <button class="album-detail-remove-btn" data-album-remove="${escapeHtml(albumName)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            ${t("album.remove")}
+          </button>
+          <button class="album-detail-back-btn" data-album-back>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            ${t("album.backToAlbums")}
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  const tracksHtml = albumTracks
+    .map(
+      (track, i) => `
+    <div class="track-item ${state.currentTrack?.filePath === track.filePath && state.isPlaying ? "playing" : ""}"
+         data-index="${state.library.indexOf(track)}" data-path="${encodePath(track.filePath)}">
+      <div class="track-item-num"><span>${i + 1}</span></div>
+      <div class="track-item-info">
+        <div class="track-item-title">${escapeHtml(track.title)}</div>
+        <div class="track-item-artist">${escapeHtml(track.artist)}</div>
+      </div>
+      <div class="track-item-album">${escapeHtml(track.album)}</div>
+      <div class="track-item-format">${track.format}</div>
+      <div class="track-item-duration">${formatTime(track.duration)}</div>
+    </div>`,
+    )
+    .join("");
+
+  els.trackList.innerHTML = headerHtml + tracksHtml;
+}
+
+function removeAlbum(albumName) {
+  showModal(
+    t("modal.removeAlbumTitle"),
+    "",
+    () => {
+      // Stop playback if current track is in this album
+      if (state.currentTrack) {
+        const trackAlbum = state.currentTrack.album || "Bilinmeyen Albüm";
+        if (trackAlbum === albumName) {
+          audioElement.pause();
+          audioElement.src = "";
+          state.isPlaying = false;
+          state.currentTrack = null;
+          state.currentIndex = -1;
+          state.playQueue = null;
+          updatePlayButton();
+          updateNowPlaying();
+        }
+      }
+
+      // Remove all tracks of this album from library
+      state.library = state.library.filter(
+        (t) => (t.album || "Bilinmeyen Albüm") !== albumName,
+      );
+      saveLibrary();
+
+      // If we were viewing this album's detail, go back
+      if (state.albumDetailView === albumName) {
+        state.albumDetailView = null;
+        applyLibraryView();
+      }
+
+      renderTrackList();
+      showToast(t("toast.albumRemoved", { name: albumName }), "success");
+    },
+    t("modal.removeAlbumConfirm"),
+    t("album.remove"),
+  );
+}
+
+function renderArtistView() {
+  const tracks = getSortedLibrary(getFilteredLibrary());
+  if (tracks.length === 0) {
+    els.trackList.innerHTML = `
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+        <p>${state.searchQuery ? t("empty.noResults") : t("empty.noMusic")}</p>
+        <p class="sub">${state.searchQuery ? t("empty.noResultsSub") : t("empty.noMusicSub")}</p>
+      </div>`;
+    return;
+  }
+
+  // Group tracks by artist
+  const artistMap = new Map();
+  tracks.forEach((track) => {
+    const key = track.artist || "Unknown Artist";
+    if (!artistMap.has(key)) {
+      artistMap.set(key, {
+        name: key,
+        coverArt: track.coverArt || null,
+        tracks: [],
+        albums: new Set(),
+      });
+    }
+    const artist = artistMap.get(key);
+    artist.tracks.push(track);
+    if (track.album) artist.albums.add(track.album);
+    if (!artist.coverArt && track.coverArt) {
+      artist.coverArt = track.coverArt;
+    }
+  });
+
+  const artists = Array.from(artistMap.values());
+
+  els.trackList.innerHTML = artists
+    .map((artist) => {
+      const coverStyle = artist.coverArt
+        ? `background-image: url('${artist.coverArt}')`
+        : "";
+      const coverClass = artist.coverArt ? "" : " empty";
+      const albumCount = artist.albums.size;
+      return `
+      <div class="artist-card" data-artist="${escapeHtml(artist.name)}">
+        <div class="artist-card-cover${coverClass}" style="${coverStyle}">
+          <span class="artist-card-cover-label">${escapeHtml(artist.name)}</span>
+          <button class="artist-card-remove" data-artist-remove="${escapeHtml(artist.name)}" title="${t("artist.remove")}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <button class="artist-card-play" data-artist-play="${escapeHtml(artist.name)}">
+            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          </button>
+        </div>
+        <div class="artist-card-body">
+          <div class="artist-card-name" title="${escapeHtml(artist.name)}">${escapeHtml(artist.name)}</div>
+          <div class="artist-card-meta">${artist.tracks.length} ${artist.tracks.length === 1 ? t("artist.track") : t("artist.tracks")}${albumCount > 0 ? " · " + albumCount + " " + t("artist.albums") : ""}</div>
+        </div>
+      </div>`;
+    })
+    .join("");
+}
+
+function renderArtistDetail(artistName) {
+  const allTracks = getSortedLibrary(getFilteredLibrary());
+  const artistTracks = allTracks.filter(
+    (t) => (t.artist || "Unknown Artist") === artistName,
+  );
+  if (artistTracks.length === 0) {
+    state.artistDetailView = null;
+    renderArtistView();
+    return;
+  }
+
+  const coverArt = artistTracks.find((t) => t.coverArt)?.coverArt;
+  const albumSet = new Set(artistTracks.map((t) => t.album).filter(Boolean));
+  const totalDuration = artistTracks.reduce((sum, t) => sum + (t.duration || 0), 0);
+  const coverStyle = coverArt ? `background-image: url('${coverArt}')` : "";
+  const coverClass = coverArt ? "artist-detail-cover" : "artist-detail-cover empty";
+
+  const headerHtml = `
+    <div class="artist-detail-header">
+      <div class="${coverClass}" style="${coverStyle}">${coverArt ? "" : "♪"}</div>
+      <div class="artist-detail-info">
+        <div class="artist-detail-title" title="${escapeHtml(artistName)}">${escapeHtml(artistName)}</div>
+        <div class="artist-detail-meta">${artistTracks.length} ${artistTracks.length === 1 ? t("artist.track") : t("artist.tracks")}${albumSet.size > 0 ? " · " + albumSet.size + " " + t("artist.albums") : ""} · ${formatTime(totalDuration)}</div>
+        <div class="artist-detail-actions">
+          <button class="artist-detail-play-btn" data-artist-play-all="${escapeHtml(artistName)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+            ${t("artist.playAll")}
+          </button>
+          <button class="artist-detail-remove-btn" data-artist-remove="${escapeHtml(artistName)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            ${t("artist.remove")}
+          </button>
+          <button class="artist-detail-back-btn" data-artist-back>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            ${t("artist.backToArtists")}
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  const tracksHtml = artistTracks
+    .map(
+      (track, i) => `
+    <div class="track-item ${state.currentTrack?.filePath === track.filePath && state.isPlaying ? "playing" : ""}"
+         data-index="${state.library.indexOf(track)}" data-path="${encodePath(track.filePath)}">
+      <div class="track-item-num"><span>${i + 1}</span></div>
+      <div class="track-item-info">
+        <div class="track-item-title">${escapeHtml(track.title)}</div>
+        <div class="track-item-artist">${escapeHtml(track.artist)}</div>
+      </div>
+      <div class="track-item-album">${escapeHtml(track.album)}</div>
+      <div class="track-item-format">${track.format}</div>
+      <div class="track-item-duration">${formatTime(track.duration)}</div>
+    </div>`,
+    )
+    .join("");
+
+  els.trackList.innerHTML = headerHtml + tracksHtml;
+}
+
+function removeArtist(artistName) {
+  showModal(
+    t("modal.removeArtistTitle"),
+    "",
+    () => {
+      // Stop playback if current track is by this artist
+      if (state.currentTrack) {
+        const trackArtist = state.currentTrack.artist || "Unknown Artist";
+        if (trackArtist === artistName) {
+          audioElement.pause();
+          audioElement.src = "";
+          state.isPlaying = false;
+          state.currentTrack = null;
+          state.currentIndex = -1;
+          state.playQueue = null;
+          updatePlayButton();
+          updateNowPlaying();
+        }
+      }
+
+      // Remove all tracks by this artist from library
+      state.library = state.library.filter(
+        (t) => (t.artist || "Unknown Artist") !== artistName,
+      );
+      saveLibrary();
+
+      // If we were viewing this artist's detail, go back
+      if (state.artistDetailView === artistName) {
+        state.artistDetailView = null;
+        applyLibraryView();
+      }
+
+      renderTrackList();
+      showToast(t("toast.artistRemoved", { name: artistName }), "success");
+    },
+    t("modal.removeArtistConfirm"),
+    t("artist.remove"),
+  );
+}
+
 function applyLibraryView() {
   if (!els.trackList) return;
   els.trackList.classList.toggle("compact", state.libraryView === "compact");
+  els.trackList.classList.toggle("album-view", state.libraryView === "album");
+  els.trackList.classList.toggle("artist-view", state.libraryView === "artist");
+  if (state.libraryView !== "album") {
+    state.albumDetailView = null;
+  }
+  if (state.libraryView !== "artist") {
+    state.artistDetailView = null;
+  }
 }
 
 function escapeHtml(str) {
@@ -1171,7 +1623,18 @@ async function playTrack(index, trackList = null) {
     await audioContext.resume();
   }
 
-  audioElement.src = `file://${track.filePath.replace(/\\/g, "/")}`;
+  // Revoke previous blob URL if any
+  if (state._blobUrl) {
+    URL.revokeObjectURL(state._blobUrl);
+    state._blobUrl = null;
+  }
+
+  const segments = track.filePath.replace(/\\/g, "/").split("/");
+  const encodedPath = segments.map((seg, i) => {
+    if (i === 0 && /^[a-zA-Z]:$/.test(seg)) return seg;
+    return encodeURIComponent(seg);
+  }).join("/");
+  audioElement.src = `file:///${encodedPath}`;
   audioElement.volume = state.volume;
 
   try {
@@ -1184,8 +1647,44 @@ async function playTrack(index, trackList = null) {
     startVisualizer();
     startVuMeter();
   } catch (err) {
-    console.error("Playback error:", err);
-    showToast(t("toast.playbackError", { message: err.message }), "error");
+    console.error("Playback error (file:// URL), trying blob fallback:", err);
+
+    // Fallback: read file as buffer and create a Blob URL
+    try {
+      const buffer = await window.electronAPI.readFileBuffer(track.filePath);
+      if (!buffer) throw new Error("Failed to read file");
+
+      const ext = track.filePath.split(".").pop().toLowerCase();
+      const mimeTypes = {
+        mp3: "audio/mpeg",
+        flac: "audio/flac",
+        wav: "audio/wav",
+        ogg: "audio/ogg",
+        m4a: "audio/mp4",
+        aac: "audio/aac",
+        wma: "audio/x-ms-wma",
+        opus: "audio/opus",
+        aiff: "audio/aiff",
+      };
+      const mime = mimeTypes[ext] || "audio/mpeg";
+
+      const blob = new Blob([buffer], { type: mime });
+      state._blobUrl = URL.createObjectURL(blob);
+      audioElement.src = state._blobUrl;
+      audioElement.volume = state.volume;
+
+      await audioElement.play();
+      state.isPlaying = true;
+      updatePlayButton();
+      updateNowPlaying();
+      renderTrackList();
+      updatePlaylistPlayingState();
+      startVisualizer();
+      startVuMeter();
+    } catch (fallbackErr) {
+      console.error("Blob fallback also failed:", fallbackErr);
+      showToast(t("toast.playbackError", { message: fallbackErr.message }), "error");
+    }
   }
 }
 
@@ -1576,10 +2075,155 @@ els.repeatBtn.addEventListener("click", () => {
 
 // --- Track List Click ---
 els.trackList.addEventListener("click", (e) => {
+  // Album remove button (card or detail view)
+  const removeBtn = e.target.closest("[data-album-remove]");
+  if (removeBtn) {
+    e.stopPropagation();
+    const albumName = decodeHtml(removeBtn.dataset.albumRemove);
+    removeAlbum(albumName);
+    return;
+  }
+
+  // Album card play button
+  const playBtn = e.target.closest("[data-album-play]");
+  if (playBtn) {
+    e.stopPropagation();
+    const albumName = decodeHtml(playBtn.dataset.albumPlay);
+    const albumTracks = state.library.filter(
+      (t) => (t.album || "Bilinmeyen Albüm") === albumName,
+    );
+    if (albumTracks.length > 0) {
+      state.playQueue = albumTracks;
+      playTrack(0, albumTracks);
+    }
+    return;
+  }
+
+  // Album card click -> open detail
+  const albumCard = e.target.closest(".album-card");
+  if (albumCard) {
+    const albumName = decodeHtml(albumCard.dataset.album);
+    state.albumDetailView = albumName;
+    els.trackList.classList.remove("album-view");
+    renderTrackList();
+    return;
+  }
+
+  // Album detail: play all button
+  const playAllBtn = e.target.closest("[data-album-play-all]");
+  if (playAllBtn) {
+    const albumName = decodeHtml(playAllBtn.dataset.albumPlayAll);
+    const albumTracks = state.library.filter(
+      (t) => (t.album || "Bilinmeyen Albüm") === albumName,
+    );
+    if (albumTracks.length > 0) {
+      state.playQueue = albumTracks;
+      playTrack(0, albumTracks);
+    }
+    return;
+  }
+
+  // Album detail: back button
+  const backBtn = e.target.closest("[data-album-back]");
+  if (backBtn) {
+    state.albumDetailView = null;
+    applyLibraryView();
+    renderTrackList();
+    return;
+  }
+
+  // Artist remove button (card or detail view)
+  const artistRemoveBtn = e.target.closest("[data-artist-remove]");
+  if (artistRemoveBtn) {
+    e.stopPropagation();
+    const artistName = decodeHtml(artistRemoveBtn.dataset.artistRemove);
+    removeArtist(artistName);
+    return;
+  }
+
+  // Artist card play button
+  const artistPlayBtn = e.target.closest("[data-artist-play]");
+  if (artistPlayBtn) {
+    e.stopPropagation();
+    const artistName = decodeHtml(artistPlayBtn.dataset.artistPlay);
+    const artistTracks = state.library.filter(
+      (t) => (t.artist || "Unknown Artist") === artistName,
+    );
+    if (artistTracks.length > 0) {
+      state.playQueue = artistTracks;
+      playTrack(0, artistTracks);
+    }
+    return;
+  }
+
+  // Artist card click -> open detail
+  const artistCard = e.target.closest(".artist-card");
+  if (artistCard) {
+    const artistName = decodeHtml(artistCard.dataset.artist);
+    state.artistDetailView = artistName;
+    els.trackList.classList.remove("artist-view");
+    renderTrackList();
+    return;
+  }
+
+  // Artist detail: play all button
+  const artistPlayAllBtn = e.target.closest("[data-artist-play-all]");
+  if (artistPlayAllBtn) {
+    const artistName = decodeHtml(artistPlayAllBtn.dataset.artistPlayAll);
+    const artistTracks = state.library.filter(
+      (t) => (t.artist || "Unknown Artist") === artistName,
+    );
+    if (artistTracks.length > 0) {
+      state.playQueue = artistTracks;
+      playTrack(0, artistTracks);
+    }
+    return;
+  }
+
+  // Artist detail: back button
+  const artistBackBtn = e.target.closest("[data-artist-back]");
+  if (artistBackBtn) {
+    state.artistDetailView = null;
+    applyLibraryView();
+    renderTrackList();
+    return;
+  }
+
+  // Normal track item click
   const item = e.target.closest(".track-item");
   if (!item) return;
   const index = parseInt(item.dataset.index);
-  playTrack(index, state.library);
+  if (state.albumDetailView) {
+    // Playing from album detail view - set album tracks as queue
+    const albumTracks = state.library.filter(
+      (t) => (t.album || "Bilinmeyen Albüm") === state.albumDetailView,
+    );
+    const trackInAlbum = albumTracks.findIndex(
+      (t) => state.library.indexOf(t) === index,
+    );
+    if (trackInAlbum !== -1) {
+      state.playQueue = albumTracks;
+      playTrack(trackInAlbum, albumTracks);
+    } else {
+      playTrack(index, state.library);
+    }
+  } else if (state.artistDetailView) {
+    // Playing from artist detail view - set artist tracks as queue
+    const artistTracks = state.library.filter(
+      (t) => (t.artist || "Unknown Artist") === state.artistDetailView,
+    );
+    const trackInArtist = artistTracks.findIndex(
+      (t) => state.library.indexOf(t) === index,
+    );
+    if (trackInArtist !== -1) {
+      state.playQueue = artistTracks;
+      playTrack(trackInArtist, artistTracks);
+    } else {
+      playTrack(index, state.library);
+    }
+  } else {
+    playTrack(index, state.library);
+  }
 });
 
 els.trackList.addEventListener("contextmenu", (e) => {
@@ -1714,14 +2358,18 @@ els.sortBtn?.addEventListener("click", () => {
 });
 
 els.viewToggleBtn?.addEventListener("click", () => {
-  state.libraryView = state.libraryView === "compact" ? "detailed" : "compact";
+  const viewOrder = ["detailed", "compact", "album", "artist"];
+  const idx = (viewOrder.indexOf(state.libraryView) + 1) % viewOrder.length;
+  state.libraryView = viewOrder[idx];
   applyLibraryView();
-  showToast(
-    state.libraryView === "compact"
-      ? t("toast.viewCompact")
-      : t("toast.viewDetailed"),
-    "info",
-  );
+  renderTrackList();
+  const viewLabels = {
+    detailed: t("toast.viewDetailed"),
+    compact: t("toast.viewCompact"),
+    album: t("toast.viewAlbum"),
+    artist: t("toast.viewArtist"),
+  };
+  showToast(viewLabels[state.libraryView], "info");
 });
 
 // --- Window Controls ---
@@ -2488,6 +3136,12 @@ async function streamYtVideo(videoId, title, thumbnail) {
     return;
   }
 
+  // Revoke previous blob URL if any
+  if (state._blobUrl) {
+    URL.revokeObjectURL(state._blobUrl);
+    state._blobUrl = null;
+  }
+
   connectAudioGraph();
   if (audioContext?.state === "suspended") await audioContext.resume();
 
@@ -3239,32 +3893,55 @@ document.addEventListener("keydown", (e) => {
 });
 
 // --- Drag & Drop ---
-document.addEventListener("dragover", (e) => {
+// Capture at window level to ensure no element blocks the drop
+window.addEventListener("dragenter", (e) => {
   e.preventDefault();
-  e.stopPropagation();
-});
+  e.dataTransfer.dropEffect = "copy";
+}, true);
 
-document.addEventListener("drop", (e) => {
+window.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "copy";
+}, true);
+
+window.addEventListener("dragleave", (e) => {
+  e.preventDefault();
+}, true);
+
+window.addEventListener("drop", async (e) => {
   e.preventDefault();
   e.stopPropagation();
-  const files = Array.from(e.dataTransfer.files)
-    .filter((f) => {
-      const ext = "." + f.name.split(".").pop().toLowerCase();
-      return [
-        ".mp3",
-        ".flac",
-        ".wav",
-        ".ogg",
-        ".m4a",
-        ".aac",
-        ".wma",
-        ".opus",
-        ".aiff",
-      ].includes(ext);
-    })
-    .map((f) => f.path);
-  if (files.length > 0) addFilesToLibrary(files);
-});
+  const SUPPORTED = [".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".wma", ".opus", ".aiff"];
+  const items = Array.from(e.dataTransfer.files);
+  const audioFiles = [];
+  const otherPaths = [];
+
+  for (const item of items) {
+    const filePath = window.electronAPI.getPathForFile(item);
+    if (!filePath) continue;
+    const ext = "." + item.name.split(".").pop().toLowerCase();
+    if (SUPPORTED.includes(ext)) {
+      audioFiles.push(filePath);
+    } else {
+      // Could be a folder — try scanning it
+      otherPaths.push(filePath);
+    }
+  }
+
+  // Try to scan non-audio items as folders
+  for (const p of otherPaths) {
+    try {
+      const scanned = await window.electronAPI.scanFolderPath(p);
+      if (scanned && scanned.length > 0) {
+        audioFiles.push(...scanned);
+      }
+    } catch (err) {
+      // Not a folder or scan failed — ignore
+    }
+  }
+
+  if (audioFiles.length > 0) addFilesToLibrary(audioFiles);
+}, true);
 
 // Ensure settings are persisted on exit
 window.addEventListener("beforeunload", () => {
