@@ -2,10 +2,10 @@
 
 Modern, şık ve güçlü bir masaüstü müzik oynatıcı. Yerel ses dosyalarını oynatabilir, YouTube'dan müzik indirebilir ve YouTube Music entegrasyonu ile çevrimiçi müzik keyfini yaşayabilirsiniz.
 
-![Electron](https://img.shields.io/badge/Electron-28-47848F?logo=electron&logoColor=white)
+![Electron](https://img.shields.io/badge/Electron-40-47848F?logo=electron&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-1.5.2-blue)
+![Version](https://img.shields.io/badge/Version-1.10.1-blue)
 
 ---
 
@@ -14,8 +14,17 @@ Modern, şık ve güçlü bir masaüstü müzik oynatıcı. Yerel ses dosyaları
 ### 🎶 Yerel Müzik Oynatma
 - **Desteklenen formatlar:** MP3, FLAC, WAV, OGG, M4A, AAC, WMA, OPUS, AIFF
 - Klasör tarama ile toplu müzik ekleme
-- ID3 metadata okuma (şarkı adı, sanatçı, albüm, kapak resmi)
-- Kütüphane yönetimi ve kalıcı saklama
+- ID3 metadata okuma (şarkı adı, sanatçı, albüm, tür, kapak resmi)
+- Kütüphane yönetimi ve kalıcı saklama (SQLite veritabanı)
+
+### 📊 Dinleme İstatistikleri (Dashboard)
+- Toplam dinleme süresi, çalınan parça ve benzersiz sanatçı/tür sayıları
+- En çok dinlenen sanatçılar, şarkılar, albümler ve türler
+- Günlük aktivite grafiği (son 30 gün)
+- Saatlik dinleme dağılımı
+- Haftalık karşılaştırma (bu hafta vs geçen hafta)
+- Format dağılımı ve son dinlenenler listesi
+- 15 saniyeden kısa dinlemeler sayılmaz (atlanan şarkılar hariç tutulur)
 
 ### 📥 YouTube İndirme
 - YouTube videolarından MP3 formatında müzik indirme
@@ -38,12 +47,15 @@ Modern, şık ve güçlü bir masaüstü müzik oynatıcı. Yerel ses dosyaları
 ### 🎨 Kullanıcı Arayüzü
 - Özel çerçevesiz (frameless) pencere tasarımı
 - Çoklu tema ve renk paleti desteği (Koyu, Açık, Okyanus, Amber, Orman, Monokrom)
-- Sidebar navigasyon (Kütüphane, Çalma Listeleri, YouTube, YT Music, Equalizer, Ayarlar)
+- Sidebar navigasyon (Kütüphane, Çalma Listeleri, YouTube, YT Music, Equalizer, Dashboard, Ayarlar)
 - Şarkı arama ve filtreleme
 - Sürükle-bırak desteği
+- Google Sans yazı tipi
 
 ### 📋 Çalma Listeleri
 - Özel çalma listeleri oluşturma ve yönetme
+- **Rastgele Mix:** Tek tıkla kütüphaneden 24 parçalık rastgele çalma listesi oluşturma (sanatçı başına maks. 4 şarkı)
+- Çalma listesi adını düzenleme (rename)
 - Çalma listelerini kalıcı olarak saklama
 - Çalma listesinden şarkı kaldırma
 - Karıştırma (shuffle) ve tekrar (repeat) modları
@@ -93,11 +105,12 @@ npm run build:portable
 alkan-player/
 ├── main.js            # Electron ana süreç (pencere, IPC, dosya işlemleri)
 ├── preload.js         # Renderer ile ana süreç arasındaki köprü (contextBridge)
+├── database.js        # SQLite veritabanı (kütüphane, çalma listeleri, dinleme geçmişi)
 ├── ytmusic.js         # YouTube Music Internal API istemcisi
 ├── package.json       # Proje yapılandırması ve bağımlılıklar
 ├── src/
 │   ├── index.html     # Ana HTML arayüzü
-│   ├── renderer.js    # Renderer süreci (UI mantığı, ses motoru, equalizer)
+│   ├── renderer.js    # Renderer süreci (UI mantığı, ses motoru, equalizer, dashboard)
 │   ├── styles.css     # Uygulama stilleri
 │   └── assets/        # İkonlar ve görseller
 │       ├── icon.png
@@ -117,9 +130,11 @@ Uygulama, Electron'un **ana süreç** (main process) ve **renderer süreç** mim
 
 2. **Preload (`preload.js`):** `contextBridge` ile güvenli bir şekilde ana süreç API'lerini renderer sürecine açar. `contextIsolation` aktif olduğu için doğrudan Node.js erişimi yoktur.
 
-3. **Renderer (`src/renderer.js`):** Kullanıcı arayüzü mantığı, Web Audio API ile ses oynatma, equalizer, spektrum analizi ve VU metre görselleştirmesi burada çalışır.
+3. **Veritabanı (`database.js`):** SQLite (`better-sqlite3`) ile kütüphane, çalma listeleri ve dinleme geçmişi verilerini kalıcı olarak saklar. Dashboard istatistiklerini hesaplayan sorgular burada bulunur.
 
-4. **YouTube Music İstemcisi (`ytmusic.js`):** YouTube Music'in dahili API'sine (`WEB_REMIX` client) HTTPS istekleri göndererek ana sayfa, arama ve çalma listesi verilerini çeker. Kimlik doğrulama için Electron webview oturum çerezlerini kullanır.
+4. **Renderer (`src/renderer.js`):** Kullanıcı arayüzü mantığı, Web Audio API ile ses oynatma, equalizer, spektrum analizi, VU metre görselleştirmesi, dinleme takibi ve dashboard burada çalışır.
+
+5. **YouTube Music İstemcisi (`ytmusic.js`):** YouTube Music'in dahili API'sine (`WEB_REMIX` client) HTTPS istekleri göndererek ana sayfa, arama ve çalma listesi verilerini çeker. Kimlik doğrulama için Electron webview oturum çerezlerini kullanır.
 
 ### Ses İşleme Zinciri
 ```
@@ -129,9 +144,10 @@ Ses Kaynağı → EQ Filtreleri (10 bant) → Analyser → Hoparlör Çıkışı
 ```
 
 ### Veri Akışı
-- **Kütüphane & Çalma Listeleri:** `userData` klasöründe JSON dosyaları olarak saklanır
+- **Kütüphane & Çalma Listeleri:** SQLite veritabanında (`%APPDATA%/alkan-player/alkan-player.db`) saklanır
+- **Dinleme Geçmişi:** Her dinleme olayı (min. 15 sn) veritabanına kaydedilir
 - **Ayarlar:** `settings.json` olarak kalıcı saklanır
-- **Metadata:** `music-metadata` kütüphanesi ile ses dosyalarından okunur
+- **Metadata:** `music-metadata` kütüphanesi ile ses dosyalarından okunur (başlık, sanatçı, albüm, tür)
 - **ID3 Tagları:** `node-id3` ile indirilen dosyalara yazılır
 
 ---
@@ -142,9 +158,11 @@ Ses Kaynağı → EQ Filtreleri (10 bant) → Analyser → Hoparlör Çıkışı
 |-------|----------|
 | `electron` | Masaüstü uygulama çatısı |
 | `electron-builder` | Windows installer oluşturucu |
+| `better-sqlite3` | SQLite veritabanı (kütüphane, playlist, dinleme geçmişi) |
 | `music-metadata` | Ses dosyası metadata okuyucu |
 | `node-id3` | MP3 ID3 tag okuma/yazma |
 | `youtube-dl-exec` | YouTube'dan ses indirme (yt-dlp) |
+| `ffmpeg-static` | FFmpeg binary (ses dönüştürme) |
 
 ---
 
