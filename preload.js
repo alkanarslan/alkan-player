@@ -45,4 +45,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Utility
   revealInExplorer: (filePath) => ipcRenderer.invoke('reveal-in-explorer', filePath),
+
+  // Listening Stats
+  saveListenEvent: (data) => ipcRenderer.invoke('save-listen-event', data),
+  getDashboardStats: () => ipcRenderer.invoke('get-dashboard-stats'),
 });

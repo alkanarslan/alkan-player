@@ -194,6 +194,7 @@ ipcMain.handle('get-metadata', async (event, filePath) => {
       title: metadata.common.title || path.basename(filePath, path.extname(filePath)),
       artist: metadata.common.artist || 'Bilinmeyen Sanatçı',
       album: metadata.common.album || 'Bilinmeyen Albüm',
+      genre: metadata.common.genre ? metadata.common.genre.join(', ') : '',
       duration: metadata.format.duration || 0,
       coverArt,
       format: path.extname(filePath).substring(1).toUpperCase(),
@@ -207,6 +208,7 @@ ipcMain.handle('get-metadata', async (event, filePath) => {
       title: path.basename(filePath, path.extname(filePath)),
       artist: 'Bilinmeyen Sanatçı',
       album: 'Bilinmeyen Albüm',
+      genre: '',
       duration: 0,
       coverArt,
       format: path.extname(filePath).substring(1).toUpperCase(),
@@ -553,6 +555,26 @@ ipcMain.handle('load-playlists', async () => {
   } catch (err) {
     console.error('Load playlists error:', err.message);
     return [];
+  }
+});
+
+// --- Listening Stats ---
+ipcMain.handle('save-listen-event', async (event, data) => {
+  try {
+    database.saveListenEvent(data);
+    return true;
+  } catch (err) {
+    console.error('Save listen event error:', err.message);
+    return false;
+  }
+});
+
+ipcMain.handle('get-dashboard-stats', async () => {
+  try {
+    return database.getDashboardStats();
+  } catch (err) {
+    console.error('Get dashboard stats error:', err.message);
+    return null;
   }
 });
 

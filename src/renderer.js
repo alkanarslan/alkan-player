@@ -21,6 +21,10 @@ const state = {
   artistDetailView: null,
   searchQuery: "",
   downloads: [],
+  // Listen tracking
+  _listenStart: null,
+  _listenedMs: 0,
+  _listenTrack: null,
   settings: {
     downloadPath: "",
     dataPath: "",
@@ -169,6 +173,54 @@ function showToast(message, type = "info") {
   setTimeout(() => toast.remove(), 3000);
 }
 
+// --- Listen Tracking ---
+function finalizeListenEvent() {
+  if (!state._listenTrack) return;
+  // If currently playing, accumulate time since last start
+  if (state._listenStart) {
+    state._listenedMs += Date.now() - state._listenStart;
+    state._listenStart = null;
+  }
+  const listenedSec = state._listenedMs / 1000;
+  // Only save if listened for at least 15 seconds
+  if (listenedSec >= 15) {
+    const track = state._listenTrack;
+    window.electronAPI.saveListenEvent({
+      filePath: track.filePath || "",
+      title: track.title || "",
+      artist: track.artist || "",
+      album: track.album || "",
+      genre: track.genre || "",
+      format: track.format || "",
+      duration: track.duration || 0,
+      listened_duration: Math.round(listenedSec),
+      played_at: new Date().toISOString(),
+    }).catch(() => {});
+  }
+  state._listenedMs = 0;
+  state._listenTrack = null;
+}
+
+function startListenTracking(track) {
+  finalizeListenEvent();
+  state._listenTrack = { ...track };
+  state._listenedMs = 0;
+  state._listenStart = Date.now();
+}
+
+function pauseListenTracking() {
+  if (state._listenStart) {
+    state._listenedMs += Date.now() - state._listenStart;
+    state._listenStart = null;
+  }
+}
+
+function resumeListenTracking() {
+  if (state._listenTrack && !state._listenStart) {
+    state._listenStart = Date.now();
+  }
+}
+
 const translations = {
   tr: {
     "app.name": "Alkan Player",
@@ -188,12 +240,16 @@ const translations = {
     "view.equalizer": "Equalizer",
     "view.settings": "Ayarlar",
     "playlist.new": "Yeni Liste",
+    "playlist.randomMix": "Rastgele Mix",
+    "playlist.randomMixSuffix": "Karışımı",
     "playlist.remove": "Listeden kaldır",
     "playlist.emptyTitle": "Henüz çalma listesi yok",
     "playlist.emptySub": "Yeni bir çalma listesi oluşturun",
     "playlist.detailEmptyTitle": "Bu listede şarkı yok",
     "playlist.detailEmptySub": "Kütüphaneden şarkı ekleyin",
     "playlist.addTo": "Çalma Listesine Ekle",
+    "playlist.rename": "Yeniden Adlandır",
+    "playlist.renameTitle": "Listeyi Yeniden Adlandır",
     "youtube.urlPlaceholder": "YouTube URL yapıştırın...",
     "youtube.download": "İndir",
     "youtube.downloading": "İndiriliyor...",
@@ -282,6 +338,7 @@ const translations = {
     "common.clear": "Temizle",
     "common.cancel": "İptal",
     "common.create": "Oluştur",
+    "common.save": "Kaydet",
     "common.confirm": "Onayla",
     "common.back": "Geri",
     "common.loading": "Yükleniyor...",
@@ -305,7 +362,10 @@ const translations = {
     "toast.addedToPlaylist": ({ name }) => `"${name}" listesine eklendi`,
     "toast.alreadyInPlaylist": "Şarkı zaten listede",
     "toast.playlistDeleted": "Çalma listesi silindi",
+    "toast.playlistRenamed": "Çalma listesi yeniden adlandırıldı",
     "toast.playlistCreated": ({ name }) => `"${name}" listesi oluşturuldu`,
+    "toast.randomMixCreated": ({ name }) => `"${name}" oluşturuldu!`,
+    "toast.libraryNotEnough": "Kütüphanede yeterli şarkı yok",
     "toast.downloadUrlMissing": "Lütfen bir YouTube URL girin",
     "toast.downloadUrlInvalid": "Geçerli bir YouTube URL girin",
     "toast.downloadSuccess": ({ title }) => `"${title}" indirildi!`,
@@ -359,6 +419,28 @@ const translations = {
     "spotify.importConfirm": "Devam etmek istiyor musunuz?",
     "spotify.importSuccess": "Spotify verileri başarıyla içe aktarıldı.",
     "spotify.urlPlaceHolder": "Playlist url eklermisin.",
+    "nav.dashboard": "Dashboard",
+    "view.dashboard": "Dashboard",
+    "dash.totalListening": "Toplam Dinleme",
+    "dash.totalTracks": "Dinlenen Parça",
+    "dash.uniqueArtists": "Farklı Sanatçı",
+    "dash.uniqueGenres": "Farklı Tür",
+    "dash.topArtists": "En Çok Dinlenen Sanatçılar",
+    "dash.topTracks": "En Çok Dinlenen Şarkılar",
+    "dash.topAlbums": "En Çok Dinlenen Albümler",
+    "dash.topGenres": "Tür Dağılımı",
+    "dash.formats": "Format Dağılımı",
+    "dash.dailyActivity": "Son 30 Gün",
+    "dash.hourlyActivity": "Saatlik Dağılım",
+    "dash.recentPlays": "Son Dinlenenler",
+    "dash.thisWeek": "Bu Hafta",
+    "dash.lastWeek": "Geçen Hafta",
+    "dash.plays": "dinleme",
+    "dash.hours": "saat",
+    "dash.minutes": "dakika",
+    "dash.noData": "Henüz dinleme verisi yok",
+    "dash.noDataSub": "Müzik dinledikçe istatistikleriniz burada görünecek",
+    "dash.weekComparison": "Haftalık Karşılaştırma",
   },
   en: {
     "app.name": "Alkan Player",
@@ -378,12 +460,16 @@ const translations = {
     "view.equalizer": "Equalizer",
     "view.settings": "Settings",
     "playlist.new": "New Playlist",
+    "playlist.randomMix": "Random Mix",
+    "playlist.randomMixSuffix": "Mix",
     "playlist.remove": "Remove from playlist",
     "playlist.emptyTitle": "No playlists yet",
     "playlist.emptySub": "Create a new playlist",
     "playlist.detailEmptyTitle": "No songs in this playlist",
     "playlist.detailEmptySub": "Add songs from the library",
     "playlist.addTo": "Add to Playlist",
+    "playlist.rename": "Rename",
+    "playlist.renameTitle": "Rename Playlist",
     "youtube.urlPlaceholder": "Paste YouTube URL...",
     "youtube.download": "Download",
     "youtube.downloading": "Downloading...",
@@ -469,6 +555,7 @@ const translations = {
     "common.clear": "Clear",
     "common.cancel": "Cancel",
     "common.create": "Create",
+    "common.save": "Save",
     "common.confirm": "Confirm",
     "common.back": "Back",
     "common.loading": "Loading...",
@@ -494,7 +581,10 @@ const translations = {
     "toast.addedToPlaylist": ({ name }) => `Added to "${name}"`,
     "toast.alreadyInPlaylist": "Song is already in the playlist",
     "toast.playlistDeleted": "Playlist deleted",
+    "toast.playlistRenamed": "Playlist renamed",
     "toast.playlistCreated": ({ name }) => `Playlist "${name}" created`,
+    "toast.randomMixCreated": ({ name }) => `"${name}" created!`,
+    "toast.libraryNotEnough": "Not enough songs in the library",
     "toast.downloadUrlMissing": "Please enter a YouTube URL",
     "toast.downloadUrlInvalid": "Enter a valid YouTube URL",
     "toast.downloadSuccess": ({ title }) => `"${title}" downloaded!`,
@@ -544,6 +634,28 @@ const translations = {
     "modal.clearLibraryTitle": "Clear Library",
     "modal.clearLibraryConfirm":
       "All songs will be removed from the library. Files will not be deleted. Continue?",
+    "nav.dashboard": "Dashboard",
+    "view.dashboard": "Dashboard",
+    "dash.totalListening": "Total Listening",
+    "dash.totalTracks": "Tracks Played",
+    "dash.uniqueArtists": "Unique Artists",
+    "dash.uniqueGenres": "Unique Genres",
+    "dash.topArtists": "Top Artists",
+    "dash.topTracks": "Top Tracks",
+    "dash.topAlbums": "Top Albums",
+    "dash.topGenres": "Genre Distribution",
+    "dash.formats": "Format Distribution",
+    "dash.dailyActivity": "Last 30 Days",
+    "dash.hourlyActivity": "Hourly Distribution",
+    "dash.recentPlays": "Recent Plays",
+    "dash.thisWeek": "This Week",
+    "dash.lastWeek": "Last Week",
+    "dash.plays": "plays",
+    "dash.hours": "hours",
+    "dash.minutes": "minutes",
+    "dash.noData": "No listening data yet",
+    "dash.noDataSub": "Your stats will appear here as you listen to music",
+    "dash.weekComparison": "Weekly Comparison",
   },
   ar: {
     "app.name": "Alkan Player",
@@ -563,12 +675,16 @@ const translations = {
     "view.equalizer": "المعادل",
     "view.settings": "الإعدادات",
     "playlist.new": "قائمة جديدة",
+    "playlist.randomMix": "مزيج عشوائي",
+    "playlist.randomMixSuffix": "مزيج",
     "playlist.remove": "إزالة من القائمة",
     "playlist.emptyTitle": "لا توجد قوائم بعد",
     "playlist.emptySub": "أنشئ قائمة تشغيل جديدة",
     "playlist.detailEmptyTitle": "لا توجد أغانٍ في هذه القائمة",
     "playlist.detailEmptySub": "أضف الأغاني من المكتبة",
     "playlist.addTo": "إضافة إلى قائمة تشغيل",
+    "playlist.rename": "إعادة تسمية",
+    "playlist.renameTitle": "إعادة تسمية القائمة",
     "youtube.urlPlaceholder": "الصق رابط يوتيوب...",
     "youtube.download": "تنزيل",
     "youtube.downloading": "جارٍ التنزيل...",
@@ -653,6 +769,7 @@ const translations = {
     "common.clear": "مسح",
     "common.cancel": "إلغاء",
     "common.create": "إنشاء",
+    "common.save": "حفظ",
     "common.confirm": "تأكيد",
     "common.back": "رجوع",
     "common.loading": "جارٍ التحميل...",
@@ -676,7 +793,10 @@ const translations = {
     "toast.addedToPlaylist": ({ name }) => `تمت الإضافة إلى "${name}"`,
     "toast.alreadyInPlaylist": "الأغنية موجودة بالفعل في القائمة",
     "toast.playlistDeleted": "تم حذف قائمة التشغيل",
+    "toast.playlistRenamed": "تمت إعادة تسمية القائمة",
     "toast.playlistCreated": ({ name }) => `تم إنشاء قائمة التشغيل "${name}"`,
+    "toast.randomMixCreated": ({ name }) => `تم إنشاء "${name}"!`,
+    "toast.libraryNotEnough": "لا توجد أغانٍ كافية في المكتبة",
     "toast.downloadUrlMissing": "يرجى إدخال رابط يوتيوب",
     "toast.downloadUrlInvalid": "أدخل رابط يوتيوب صالح",
     "toast.downloadSuccess": ({ title }) => `تم تنزيل "${title}"`,
@@ -726,6 +846,28 @@ const translations = {
     "modal.clearLibraryTitle": "مسح المكتبة",
     "modal.clearLibraryConfirm":
       "ستتم إزالة جميع الأغاني من المكتبة. لن يتم حذف الملفات. هل تريد المتابعة؟",
+    "nav.dashboard": "لوحة المعلومات",
+    "view.dashboard": "لوحة المعلومات",
+    "dash.totalListening": "إجمالي الاستماع",
+    "dash.totalTracks": "المقاطع المُشغّلة",
+    "dash.uniqueArtists": "فنانون مختلفون",
+    "dash.uniqueGenres": "أنواع مختلفة",
+    "dash.topArtists": "أكثر الفنانين استماعاً",
+    "dash.topTracks": "أكثر الأغاني استماعاً",
+    "dash.topAlbums": "أكثر الألبومات استماعاً",
+    "dash.topGenres": "توزيع الأنواع",
+    "dash.formats": "توزيع الصيغ",
+    "dash.dailyActivity": "آخر 30 يوماً",
+    "dash.hourlyActivity": "التوزيع بالساعة",
+    "dash.recentPlays": "آخر ما استُمع إليه",
+    "dash.thisWeek": "هذا الأسبوع",
+    "dash.lastWeek": "الأسبوع الماضي",
+    "dash.plays": "تشغيل",
+    "dash.hours": "ساعات",
+    "dash.minutes": "دقائق",
+    "dash.noData": "لا توجد بيانات استماع بعد",
+    "dash.noDataSub": "ستظهر إحصائياتك هنا مع استماعك للموسيقى",
+    "dash.weekComparison": "مقارنة أسبوعية",
   },
   it: {
     "app.name": "Alkan Player",
@@ -745,12 +887,16 @@ const translations = {
     "view.equalizer": "Equalizzatore",
     "view.settings": "Impostazioni",
     "playlist.new": "Nuova playlist",
+    "playlist.randomMix": "Mix casuale",
+    "playlist.randomMixSuffix": "Mix",
     "playlist.remove": "Rimuovi dalla playlist",
     "playlist.emptyTitle": "Nessuna playlist",
     "playlist.emptySub": "Crea una nuova playlist",
     "playlist.detailEmptyTitle": "Nessun brano in questa playlist",
     "playlist.detailEmptySub": "Aggiungi brani dalla libreria",
     "playlist.addTo": "Aggiungi alla playlist",
+    "playlist.rename": "Rinomina",
+    "playlist.renameTitle": "Rinomina playlist",
     "youtube.urlPlaceholder": "Incolla URL di YouTube...",
     "youtube.download": "Scarica",
     "youtube.downloading": "Download in corso...",
@@ -839,6 +985,7 @@ const translations = {
     "common.clear": "Svuota",
     "common.cancel": "Annulla",
     "common.create": "Crea",
+    "common.save": "Salva",
     "common.confirm": "Conferma",
     "common.back": "Indietro",
     "common.loading": "Caricamento...",
@@ -865,7 +1012,10 @@ const translations = {
     "toast.addedToPlaylist": ({ name }) => `Aggiunto a "${name}"`,
     "toast.alreadyInPlaylist": "Il brano è già nella playlist",
     "toast.playlistDeleted": "Playlist eliminata",
+    "toast.playlistRenamed": "Playlist rinominata",
     "toast.playlistCreated": ({ name }) => `Playlist "${name}" creata`,
+    "toast.randomMixCreated": ({ name }) => `"${name}" creata!`,
+    "toast.libraryNotEnough": "Non ci sono abbastanza brani nella libreria",
     "toast.downloadUrlMissing": "Inserisci un URL di YouTube",
     "toast.downloadUrlInvalid": "Inserisci un URL di YouTube valido",
     "toast.downloadSuccess": ({ title }) => `"${title}" scaricato!`,
@@ -915,6 +1065,28 @@ const translations = {
     "modal.clearLibraryTitle": "Svuota libreria",
     "modal.clearLibraryConfirm":
       "Tutti i brani verranno rimossi dalla libreria. I file non verranno eliminati. Continuare?",
+    "nav.dashboard": "Dashboard",
+    "view.dashboard": "Dashboard",
+    "dash.totalListening": "Ascolto Totale",
+    "dash.totalTracks": "Brani Riprodotti",
+    "dash.uniqueArtists": "Artisti Unici",
+    "dash.uniqueGenres": "Generi Unici",
+    "dash.topArtists": "Artisti Più Ascoltati",
+    "dash.topTracks": "Brani Più Ascoltati",
+    "dash.topAlbums": "Album Più Ascoltati",
+    "dash.topGenres": "Distribuzione Generi",
+    "dash.formats": "Distribuzione Formati",
+    "dash.dailyActivity": "Ultimi 30 Giorni",
+    "dash.hourlyActivity": "Distribuzione Oraria",
+    "dash.recentPlays": "Ascolti Recenti",
+    "dash.thisWeek": "Questa Settimana",
+    "dash.lastWeek": "Settimana Scorsa",
+    "dash.plays": "ascolti",
+    "dash.hours": "ore",
+    "dash.minutes": "minuti",
+    "dash.noData": "Nessun dato di ascolto",
+    "dash.noDataSub": "Le tue statistiche appariranno qui mentre ascolti musica",
+    "dash.weekComparison": "Confronto Settimanale",
   },
 };
 
@@ -1030,6 +1202,9 @@ function switchView(viewName) {
   }
   if (viewName === "ytmusic") {
     initYtMusic();
+  }
+  if (viewName === "dashboard") {
+    renderDashboard();
   }
 }
 
@@ -1640,6 +1815,7 @@ async function playTrack(index, trackList = null) {
   try {
     await audioElement.play();
     state.isPlaying = true;
+    startListenTracking(track);
     updatePlayButton();
     updateNowPlaying();
     renderTrackList();
@@ -1675,6 +1851,7 @@ async function playTrack(index, trackList = null) {
 
       await audioElement.play();
       state.isPlaying = true;
+      startListenTracking(track);
       updatePlayButton();
       updateNowPlaying();
       renderTrackList();
@@ -1699,11 +1876,13 @@ function togglePlay() {
   if (state.isPlaying) {
     audioElement.pause();
     state.isPlaying = false;
+    pauseListenTracking();
   } else {
     connectAudioGraph();
     if (audioContext?.state === "suspended") audioContext.resume();
     audioElement.play();
     state.isPlaying = true;
+    resumeListenTracking();
   }
   updatePlayButton();
   renderTrackList();
@@ -1795,6 +1974,7 @@ audioElement.addEventListener("loadedmetadata", () => {
 });
 
 audioElement.addEventListener("ended", () => {
+  finalizeListenEvent();
   playNext();
 });
 
@@ -2394,7 +2574,7 @@ async function loadPlaylists() {
           return decoded;
         })
       : [];
-    return { ...p, tracks };
+    return { ...p, id: p.id || generateId(), tracks };
   });
   if (changed) savePlaylists();
 }
@@ -2439,10 +2619,11 @@ function renderPlaylists() {
       const coverClass = cover ? "" : "empty";
       return `
     <div class="playlist-card" data-id="${p.id}">
+      <button class="playlist-card-rename" data-rename="${p.id}" title="${t("playlist.rename")}">✎</button>
       <button class="playlist-card-delete" data-delete="${p.id}" title="${t("common.delete")}">✕</button>
       <div class="playlist-card-cover ${coverClass}" ${coverStyle}></div>
       <div class="playlist-card-body">
-        <div class="playlist-card-name">${escapeHtml(p.name)}</div>
+        <div class="playlist-card-name" data-rename="${p.id}">${escapeHtml(p.name)}</div>
         <div class="playlist-card-count">${t("common.songCount", { count: p.tracks.length })}</div>
       </div>
     </div>`;
@@ -2452,8 +2633,33 @@ function renderPlaylists() {
   // Click handlers
   $$(".playlist-card").forEach((card) => {
     card.addEventListener("click", (e) => {
-      if (e.target.closest(".playlist-card-delete")) return;
+      if (e.target.closest(".playlist-card-delete") || e.target.closest(".playlist-card-rename") || e.target.closest(".playlist-card-name")) return;
       openPlaylistDetail(card.dataset.id);
+    });
+  });
+
+  $$(".playlist-card-rename, .playlist-card-name").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.rename;
+      const pl = state.playlists.find((p) => p.id === id);
+      if (!pl) return;
+      showModal(
+        t("playlist.renameTitle"),
+        pl.name,
+        (newName) => {
+          if (!newName.trim()) return;
+          pl.name = newName.trim();
+          savePlaylists();
+          renderPlaylists();
+          showToast(t("toast.playlistRenamed"), "success");
+        },
+        null,
+        null,
+        t("common.save"),
+      );
+      const input = document.querySelector(".modal-overlay input");
+      if (input) input.value = pl.name;
     });
   });
 
@@ -2600,6 +2806,35 @@ $("#btn-new-playlist").addEventListener("click", () => {
   );
 });
 
+$("#btn-random-playlist").addEventListener("click", () => {
+  if (state.library.length < 1) {
+    showToast(t("toast.libraryNotEnough"), "info");
+    return;
+  }
+  const count = Math.min(24, state.library.length);
+  const shuffled = [...state.library].sort(() => Math.random() - 0.5);
+  const picked = [];
+  const artistCount = {};
+  for (const tr of shuffled) {
+    if (picked.length >= count) break;
+    const artist = (tr.artist || "").toLowerCase();
+    if (artist && (artistCount[artist] || 0) >= 4) continue;
+    picked.push(tr);
+    if (artist) artistCount[artist] = (artistCount[artist] || 0) + 1;
+  }
+  const randomTrack = picked[Math.floor(Math.random() * picked.length)];
+  const name = randomTrack.title || randomTrack.artist || t("playlist.randomMix");
+  const playlist = {
+    id: generateId(),
+    name,
+    tracks: picked.map((tr) => tr.filePath),
+  };
+  state.playlists.push(playlist);
+  savePlaylists();
+  renderPlaylists();
+  showToast(t("toast.randomMixCreated", { name }), "success");
+});
+
 // --- Modal ---
 function showModal(
   title,
@@ -2607,6 +2842,7 @@ function showModal(
   onConfirm,
   confirmMessage,
   confirmLabel,
+  inputBtnLabel,
 ) {
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -2640,7 +2876,7 @@ function showModal(
         <input type="text" placeholder="${placeholder}" autofocus>
         <div class="modal-actions">
           <button class="btn-ghost btn-cancel">${t("common.cancel")}</button>
-          <button class="btn-accent btn-confirm">${t("common.create")}</button>
+          <button class="btn-accent btn-confirm">${inputBtnLabel || t("common.create")}</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -4046,6 +4282,313 @@ $("#btn-change-data-path").addEventListener("click", async () => {
   }
 });
 
+// ============================================
+// Dashboard
+// ============================================
+
+function formatDuration(totalSec) {
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  if (hours > 0) return `${hours} ${t("dash.hours")} ${minutes} ${t("dash.minutes")}`;
+  return `${minutes} ${t("dash.minutes")}`;
+}
+
+function formatDurationShort(totalSec) {
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+async function renderDashboard() {
+  const container = $("#dashboard-content");
+  if (!container) return;
+
+  container.innerHTML = `<div class="dash-loading">${t("common.loading")}</div>`;
+
+  const stats = await window.electronAPI.getDashboardStats();
+  if (!stats || !stats.overall || stats.overall.totalPlays === 0) {
+    container.innerHTML = `
+      <div class="dash-empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
+          <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+        <p>${t("dash.noData")}</p>
+        <p class="sub">${t("dash.noDataSub")}</p>
+      </div>`;
+    return;
+  }
+
+  const { overall, topArtists, topTracks, topAlbums, topGenres, formatDist, dailyListening, hourlyDist, recentPlays, thisWeek, lastWeek } = stats;
+
+  // Build stat cards
+  let html = `<div class="dash-stats-row">`;
+  html += `
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="dash-stat-value">${formatDuration(overall.totalListenedSec)}</div>
+      <div class="dash-stat-label">${t("dash.totalListening")}</div>
+    </div>
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+      </div>
+      <div class="dash-stat-value">${overall.totalPlays}</div>
+      <div class="dash-stat-label">${t("dash.totalTracks")}</div>
+    </div>
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </div>
+      <div class="dash-stat-value">${overall.uniqueArtists}</div>
+      <div class="dash-stat-label">${t("dash.uniqueArtists")}</div>
+    </div>
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="dash-stat-value">${overall.uniqueGenres}</div>
+      <div class="dash-stat-label">${t("dash.uniqueGenres")}</div>
+    </div>
+  `;
+  html += `</div>`;
+
+  // Weekly comparison
+  html += `
+    <div class="dash-section">
+      <h3 class="dash-section-title">${t("dash.weekComparison")}</h3>
+      <div class="dash-week-compare">
+        <div class="dash-week-card">
+          <div class="dash-week-label">${t("dash.thisWeek")}</div>
+          <div class="dash-week-value">${thisWeek.plays} ${t("dash.plays")}</div>
+          <div class="dash-week-time">${formatDurationShort(thisWeek.totalTime)}</div>
+        </div>
+        <div class="dash-week-divider">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+        <div class="dash-week-card">
+          <div class="dash-week-label">${t("dash.lastWeek")}</div>
+          <div class="dash-week-value">${lastWeek.plays} ${t("dash.plays")}</div>
+          <div class="dash-week-time">${formatDurationShort(lastWeek.totalTime)}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Daily activity chart (last 30 days)
+  if (dailyListening.length > 0) {
+    const maxTime = Math.max(...dailyListening.map(d => d.totalTime), 1);
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.dailyActivity")}</h3>
+        <div class="dash-chart-container">
+          <div class="dash-bar-chart">
+            ${dailyListening.map(d => {
+              const pct = (d.totalTime / maxTime) * 100;
+              const dayLabel = d.day.substring(5); // MM-DD
+              return `
+                <div class="dash-bar-col" title="${d.day}: ${formatDurationShort(d.totalTime)} (${d.playCount} ${t("dash.plays")})">
+                  <div class="dash-bar" style="height: ${Math.max(pct, 2)}%"></div>
+                  <span class="dash-bar-label">${dayLabel}</span>
+                </div>`;
+            }).join("")}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Top Artists & Top Tracks side by side
+  html += `<div class="dash-grid-2">`;
+
+  // Top Artists
+  if (topArtists.length > 0) {
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.topArtists")}</h3>
+        <div class="dash-list">
+          ${topArtists.map((a, i) => `
+            <div class="dash-list-item">
+              <span class="dash-list-rank">${i + 1}</span>
+              <div class="dash-list-info">
+                <span class="dash-list-name">${escapeHtml(a.artist)}</span>
+                <span class="dash-list-meta">${a.playCount} ${t("dash.plays")} · ${formatDurationShort(a.totalTime)}</span>
+              </div>
+              <div class="dash-list-bar-bg">
+                <div class="dash-list-bar" style="width: ${(a.playCount / topArtists[0].playCount) * 100}%"></div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  // Top Tracks
+  if (topTracks.length > 0) {
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.topTracks")}</h3>
+        <div class="dash-list">
+          ${topTracks.map((tr, i) => `
+            <div class="dash-list-item">
+              <span class="dash-list-rank">${i + 1}</span>
+              <div class="dash-list-info">
+                <span class="dash-list-name">${escapeHtml(tr.title)}</span>
+                <span class="dash-list-meta">${escapeHtml(tr.artist)} · ${tr.playCount} ${t("dash.plays")}</span>
+              </div>
+              <div class="dash-list-bar-bg">
+                <div class="dash-list-bar" style="width: ${(tr.playCount / topTracks[0].playCount) * 100}%"></div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  html += `</div>`;
+
+  // Top Albums & Top Genres side by side
+  html += `<div class="dash-grid-2">`;
+
+  // Top Albums
+  if (topAlbums.length > 0) {
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.topAlbums")}</h3>
+        <div class="dash-list">
+          ${topAlbums.map((a, i) => `
+            <div class="dash-list-item">
+              <span class="dash-list-rank">${i + 1}</span>
+              <div class="dash-list-info">
+                <span class="dash-list-name">${escapeHtml(a.album)}</span>
+                <span class="dash-list-meta">${escapeHtml(a.artist)} · ${a.playCount} ${t("dash.plays")}</span>
+              </div>
+              <div class="dash-list-bar-bg">
+                <div class="dash-list-bar" style="width: ${(a.playCount / topAlbums[0].playCount) * 100}%"></div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  // Top Genres
+  if (topGenres.length > 0) {
+    const totalGenrePlays = topGenres.reduce((s, g) => s + g.playCount, 0);
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.topGenres")}</h3>
+        <div class="dash-genre-grid">
+          ${topGenres.map(g => {
+            const pct = Math.round((g.playCount / totalGenrePlays) * 100);
+            return `
+              <div class="dash-genre-item">
+                <div class="dash-genre-bar-bg">
+                  <div class="dash-genre-bar" style="width: ${pct}%"></div>
+                </div>
+                <div class="dash-genre-info">
+                  <span class="dash-genre-name">${escapeHtml(g.genre)}</span>
+                  <span class="dash-genre-pct">${pct}%</span>
+                </div>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  html += `</div>`;
+
+  // Hourly distribution & Format distribution side by side
+  html += `<div class="dash-grid-2">`;
+
+  // Hourly distribution
+  if (hourlyDist.length > 0) {
+    const maxHour = Math.max(...hourlyDist.map(h => h.playCount), 1);
+    const hourMap = {};
+    hourlyDist.forEach(h => { hourMap[h.hour] = h.playCount; });
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.hourlyActivity")}</h3>
+        <div class="dash-hourly-chart">
+          ${Array.from({ length: 24 }, (_, i) => {
+            const count = hourMap[i] || 0;
+            const pct = (count / maxHour) * 100;
+            return `
+              <div class="dash-hour-col" title="${String(i).padStart(2, '0')}:00 - ${count} ${t("dash.plays")}">
+                <div class="dash-hour-bar" style="height: ${Math.max(pct, 2)}%"></div>
+                <span class="dash-hour-label">${i % 3 === 0 ? String(i).padStart(2, '0') : ''}</span>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  // Format distribution
+  if (formatDist.length > 0) {
+    const totalFormatPlays = formatDist.reduce((s, f) => s + f.playCount, 0);
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.formats")}</h3>
+        <div class="dash-format-grid">
+          ${formatDist.map(f => {
+            const pct = Math.round((f.playCount / totalFormatPlays) * 100);
+            return `
+              <div class="dash-format-item">
+                <span class="dash-format-badge">${f.format}</span>
+                <div class="dash-format-bar-bg">
+                  <div class="dash-format-bar" style="width: ${pct}%"></div>
+                </div>
+                <span class="dash-format-pct">${pct}%</span>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  html += `</div>`;
+
+  // Recent plays
+  if (recentPlays.length > 0) {
+    html += `
+      <div class="dash-section">
+        <h3 class="dash-section-title">${t("dash.recentPlays")}</h3>
+        <div class="dash-recent-list">
+          ${recentPlays.map(r => {
+            const date = new Date(r.played_at);
+            const timeStr = date.toLocaleString(state.settings?.language || "tr", {
+              month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+            });
+            return `
+              <div class="dash-recent-item">
+                <div class="dash-recent-info">
+                  <span class="dash-recent-title">${escapeHtml(r.title || "")}</span>
+                  <span class="dash-recent-meta">${escapeHtml(r.artist || "")}${r.album ? " · " + escapeHtml(r.album) : ""}</span>
+                </div>
+                <div class="dash-recent-right">
+                  ${r.genre ? `<span class="dash-recent-genre">${escapeHtml(r.genre)}</span>` : ""}
+                  <span class="dash-recent-time">${timeStr}</span>
+                </div>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
 $("#btn-clear-library").addEventListener("click", () => {
   if (state.library.length === 0) {
     showToast(t("toast.libraryEmpty"), "info");
@@ -4074,6 +4617,9 @@ async function init() {
   initAudioContext();
   window.addEventListener("resize", () => {
     if (state.currentTrack) setMarqueeTitle(state.currentTrack.title);
+  });
+  window.addEventListener("beforeunload", () => {
+    finalizeListenEvent();
   });
   await loadSettings();
   if (stereoPanner) stereoPanner.pan.value = state.settings.balance || 0;

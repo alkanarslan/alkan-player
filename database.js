@@ -71,9 +71,26 @@ function createTables() {
       value TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS listening_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      filePath TEXT NOT NULL,
+      title TEXT,
+      artist TEXT,
+      album TEXT,
+      genre TEXT,
+      format TEXT,
+      duration REAL DEFAULT 0,
+      listened_duration REAL DEFAULT 0,
+      played_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_library_album ON library(album);
     CREATE INDEX IF NOT EXISTS idx_library_artist ON library(artist);
     CREATE INDEX IF NOT EXISTS idx_playlist_tracks_playlist ON playlist_tracks(playlist_id);
+    CREATE INDEX IF NOT EXISTS idx_listen_played_at ON listening_history(played_at);
+    CREATE INDEX IF NOT EXISTS idx_listen_artist ON listening_history(artist);
+    CREATE INDEX IF NOT EXISTS idx_listen_album ON listening_history(album);
+    CREATE INDEX IF NOT EXISTS idx_listen_genre ON listening_history(genre);
   `);
 }
 
@@ -287,6 +304,140 @@ function migrateFromJson(jsonPaths) {
   }
 }
 
+// ============================================================
+// Listening History
+// ============================================================
+
+/**
+ * Save a single listen event.
+ * @param {object} event - { filePath, title, artist, album, genre, format, duration, listened_duration, played_at }
+ */
+function saveListenEvent(event) {
+  const stmt = db.prepare(`
+    INSERT INTO listening_history (filePath, title, artist, album, genre, format, duration, listened_duration, played_at)
+    VALUES (@filePath, @title, @artist, @album, @genre, @format, @duration, @listened_duration, @played_at)
+  `);
+  stmt.run({
+    filePath: event.filePath || '',
+    title: event.title || null,
+    artist: event.artist || null,
+    album: event.album || null,
+    genre: event.genre || null,
+    format: event.format || null,
+    duration: event.duration || 0,
+    listened_duration: event.listened_duration || 0,
+    played_at: event.played_at || new Date().toISOString(),
+  });
+}
+
+/**
+ * Get comprehensive dashboard statistics.
+ * @returns {object} All dashboard data
+ */
+function getDashboardStats() {
+  // Overall stats
+  const overall = db.prepare(`
+    SELECT
+      COUNT(*) as totalPlays,
+      COALESCE(SUM(listened_duration), 0) as totalListenedSec,
+      COUNT(DISTINCT artist) as uniqueArtists,
+      COUNT(DISTINCT album) as uniqueAlbums,
+      COUNT(DISTINCT genre) as uniqueGenres,
+      COUNT(DISTINCT filePath) as uniqueTracks
+    FROM listening_history
+  `).get();
+
+  // Top artists (all time)
+  const topArtists = db.prepare(`
+    SELECT artist, COUNT(*) as playCount, SUM(listened_duration) as totalTime
+    FROM listening_history
+    WHERE artist IS NOT NULL AND artist != '' AND artist != 'Bilinmeyen Sanatçı' AND artist != 'Unknown Artist'
+    GROUP BY artist ORDER BY playCount DESC LIMIT 10
+  `).all();
+
+  // Top tracks (all time)
+  const topTracks = db.prepare(`
+    SELECT title, artist, filePath, COUNT(*) as playCount, SUM(listened_duration) as totalTime
+    FROM listening_history
+    WHERE title IS NOT NULL AND title != ''
+    GROUP BY filePath ORDER BY playCount DESC LIMIT 10
+  `).all();
+
+  // Top albums (all time)
+  const topAlbums = db.prepare(`
+    SELECT album, artist, COUNT(*) as playCount, SUM(listened_duration) as totalTime
+    FROM listening_history
+    WHERE album IS NOT NULL AND album != '' AND album != 'Bilinmeyen Albüm' AND album != 'Unknown Album'
+    GROUP BY album ORDER BY playCount DESC LIMIT 10
+  `).all();
+
+  // Top genres (all time)
+  const topGenres = db.prepare(`
+    SELECT genre, COUNT(*) as playCount, SUM(listened_duration) as totalTime
+    FROM listening_history
+    WHERE genre IS NOT NULL AND genre != ''
+    GROUP BY genre ORDER BY playCount DESC LIMIT 10
+  `).all();
+
+  // Format distribution
+  const formatDist = db.prepare(`
+    SELECT format, COUNT(*) as playCount
+    FROM listening_history
+    WHERE format IS NOT NULL AND format != ''
+    GROUP BY format ORDER BY playCount DESC
+  `).all();
+
+  // Daily listening (last 30 days)
+  const dailyListening = db.prepare(`
+    SELECT DATE(played_at) as day, SUM(listened_duration) as totalTime, COUNT(*) as playCount
+    FROM listening_history
+    WHERE played_at >= datetime('now', '-30 days')
+    GROUP BY DATE(played_at) ORDER BY day ASC
+  `).all();
+
+  // Hourly distribution (all time)
+  const hourlyDist = db.prepare(`
+    SELECT CAST(strftime('%H', played_at) AS INTEGER) as hour, COUNT(*) as playCount
+    FROM listening_history
+    GROUP BY hour ORDER BY hour ASC
+  `).all();
+
+  // Recent plays
+  const recentPlays = db.prepare(`
+    SELECT title, artist, album, genre, format, duration, listened_duration, played_at
+    FROM listening_history
+    ORDER BY played_at DESC LIMIT 20
+  `).all();
+
+  // Weekly stats (this week vs last week)
+  const thisWeek = db.prepare(`
+    SELECT COUNT(*) as plays, COALESCE(SUM(listened_duration), 0) as totalTime
+    FROM listening_history
+    WHERE played_at >= datetime('now', 'weekday 0', '-6 days', 'start of day')
+  `).get();
+
+  const lastWeek = db.prepare(`
+    SELECT COUNT(*) as plays, COALESCE(SUM(listened_duration), 0) as totalTime
+    FROM listening_history
+    WHERE played_at >= datetime('now', 'weekday 0', '-13 days', 'start of day')
+      AND played_at < datetime('now', 'weekday 0', '-6 days', 'start of day')
+  `).get();
+
+  return {
+    overall,
+    topArtists,
+    topTracks,
+    topAlbums,
+    topGenres,
+    formatDist,
+    dailyListening,
+    hourlyDist,
+    recentPlays,
+    thisWeek,
+    lastWeek,
+  };
+}
+
 /**
  * Close the database connection.
  */
@@ -306,4 +457,6 @@ module.exports = {
   loadPlaylists,
   saveSettings,
   loadSettings,
+  saveListenEvent,
+  getDashboardStats,
 };
